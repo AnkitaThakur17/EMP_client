@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { punchIn, punchOut } from "../redux/slices/AttendanceSlice";
@@ -65,7 +64,6 @@ const AttendancePage = () => {
 
     dispatch(punchOut({ punchOutData: payload, token }));
   };
-
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
       <h3 className="text-2xl mb-6 text-gray-800 font-semibold">

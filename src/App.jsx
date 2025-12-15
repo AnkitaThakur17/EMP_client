@@ -6,6 +6,8 @@ import CreateEmployee from "./pages/CreateEmployee";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeProfile from "./pages/EmployeeProfile";
 import AttendancePage from "./pages/AttendancePage";
+import MyAttendance from "./pages/MyAttendance";
+import AllAttendancePage from "./pages/AllAttendancePage";
 
 function App() {
   const { user } = useSelector((state) => state.auth);
@@ -44,7 +46,8 @@ function App() {
         <Route path="employeeList" element={<EmployeeList/>} />
         <Route path="employeeProfile" element={<EmployeeProfile/>} />
         <Route path="attendancePage" element={<AttendancePage/>}/>
-        
+        <Route path="myAttendance" element={<MyAttendance/>}/>
+        <Route path="allAttendance" element={<AllAttendancePage/>}/>
         </Route>
         
 

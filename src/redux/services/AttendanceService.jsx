@@ -46,10 +46,9 @@ const punchIn = async (punchInData, token) => {
 };
 
 //punchOut
-const punchOut = async( punchOutData, token)=>{
-try {
-
-   const response = await axios.post(`${API_URL}/punchOut`, punchOutData, {
+const punchOut = async (punchOutData, token) => {
+  try {
+    const response = await axios.post(`${API_URL}/punchOut`, punchOutData, {
       headers: {
         ...baseHeaders,
         "access-token": token,
@@ -61,9 +60,8 @@ try {
       message: response.data.message,
       data: response.data.data,
     };
-  
-} catch (error) {
-      if (error.response) {
+  } catch (error) {
+    if (error.response) {
       const backendCode = error.response.data.code;
       const finalMsg = getErrorMessage(backendCode);
 
@@ -79,9 +77,75 @@ try {
       throw { code: 0, message: "No response from server" };
     }
     throw { code: 0, message: error.message || "An error occurred" };
-  
-}
+  }
+};
 
-}
+//myAttendance
+const myAttendance = async (token) => {
+  try {
+    const response = await axios.get(`${API_URL}/myAttendance`, {
+      headers: {
+        ...baseHeaders,
+        "access-token": token,
+      },
+    });
+      return {
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  } catch (error) {
+        if (error.response) {
+      const backendCode = error.response.data.code;
+      const finalMsg = getErrorMessage(backendCode);
 
-export default { punchIn, punchOut }
+      throw {
+        code: backendCode,
+        message: finalMsg,
+        status: error.response.status,
+        data: error.response.data.data || null,
+      };
+    }
+
+    if (error.request) {
+      throw { code: 0, message: "No response from server" };
+    }
+    throw { code: 0, message: error.message || "An error occurred" };
+
+  }
+};
+
+//allAttendance
+const allAttendance = async(token)=>{
+try {
+      const response = await axios.get(`${API_URL}/allAttendance`, {
+      headers: {
+        ...baseHeaders,
+        "access-token": token,
+      },
+    })
+      return {
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+} catch (error) {
+          if (error.response) {
+      const backendCode = error.response.data.code;
+      const finalMsg = getErrorMessage(backendCode);
+
+      throw {
+        code: backendCode,
+        message: finalMsg,
+        status: error.response.status,
+        data: error.response.data.data || null,
+      };
+    }
+
+    if (error.request) {
+      throw { code: 0, message: "No response from server" };
+    }
+    throw { code: 0, message: error.message || "An error occurred" };
+}
+}
+export default { punchIn, punchOut, myAttendance, allAttendance };

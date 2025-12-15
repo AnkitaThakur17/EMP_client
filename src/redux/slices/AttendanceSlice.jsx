@@ -32,18 +32,51 @@ export const punchIn = createAsyncThunk(
 //punchOut
 export const punchOut = createAsyncThunk(
   "attendance/punchOut",
-  async ({punchOutData, token},{ rejectWithValue }) =>{
+  async ({ punchOutData, token }, { rejectWithValue }) => {
     try {
       const response = await attendanceService.punchOut(punchOutData, token);
       return response;
     } catch (error) {
-        return rejectWithValue({
+      return rejectWithValue({
+        code: error.code || 0,
+        message: error.message || "Something went wrong",
+      });
+    }
+  }
+);
+
+//myAttendance
+export const myAttendance = createAsyncThunk(
+  "attendance/myAttendance",
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await attendanceService.myAttendance(token);
+      return response;
+    } catch (error) {
+      return rejectWithValue({
+        code: error.code || 0,
+        message: error.message || "Something went wrong",
+      });
+    }
+  }
+);
+
+//allAttendance
+export const allAttendance = createAsyncThunk(
+  "attendance/allAttendance",
+  async(token,{ rejectWithValue }) => {
+    try {
+      const response = await attendanceService.allAttendance(token);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue({
         code: error.code || 0,
         message: error.message || "Something went wrong",
       });
     }
   }
 )
+
 
 // Initial state
 const initialState = {
@@ -52,6 +85,9 @@ const initialState = {
   loading: false,
   error: null,
   punchInData: null, // store punchIn response
+  data: [],
+  employees: [],
+  allAttendance: [],
 };
 
 // Slice
@@ -81,22 +117,70 @@ const attendanceSlice = createSlice({
       })
       .addCase(punchIn.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || { code: 0, message: "Failed to punch in" };
+        state.error = action.payload || {
+          code: 0,
+          message: "Failed to punch in",
+        };
       })
 
       //punchOut
-    .addCase(punchOut.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(punchOut.fulfilled, (state, action) => {
-      state.loading = false;
-      state.punchOutData = action.payload.data
-    })
-    .addCase(punchOut.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload || { code:0, message: "failed to punch out" }
-    })
+      .addCase(punchOut.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(punchOut.fulfilled, (state, action) => {
+        state.loading = false;
+        state.punchOutData = action.payload.data;
+      })
+      .addCase(punchOut.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || {
+          code: 0,
+          message: "failed to punch out",
+        };
+      })
+
+      //myAttendance
+      .addCase(myAttendance.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(myAttendance.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const result = action.payload.data;
+
+        // Ensure the data is always an array
+        state.myAttendance = Array.isArray(result) ? result : [result];
+      })
+      // .addCase(myAttendance.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.myAttendance = action.payload.data
+      // })
+      .addCase(myAttendance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || {
+          code: 0,
+          message: "failed to load my attendance",
+        };
+      })
+      //allAttendance
+      .addCase(allAttendance.pending,(state, action)=>{
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(allAttendance.fulfilled,(state, action)=>{
+        state.loading = false;
+        state.allAttendance = action.payload
+      })
+      .addCase(allAttendance.rejected, (state, action)=>{
+        state.loading = false;
+        state.error = action.payload || {
+          code:0,
+          message: "failed to load all attendance",
+        }
+      })
   },
 });
 

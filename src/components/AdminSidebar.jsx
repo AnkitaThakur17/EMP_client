@@ -107,9 +107,9 @@ export default function AdminSidebar({
             >
               <Calendar size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
-                <span className="text-gray-700 font-medium transition-all duration-300">
+                <Link to="/allAttendance" className="text-gray-700 font-medium transition-all duration-300">
                   Attendance Overview
-                </span>
+                </Link>
               )}
             </Link>
           </li>

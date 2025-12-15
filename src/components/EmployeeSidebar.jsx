@@ -79,9 +79,9 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
             >
               <Calendar size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
-                <span className="text-gray-700 font-medium transition-all duration-300">
+                <Link to="/myAttendance" className="text-gray-700 font-medium transition-all duration-300">
                   Attendance History
-                </span>
+                </Link>
               )}
             </Link>
           </li>
