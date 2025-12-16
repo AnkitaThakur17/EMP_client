@@ -1,5 +1,5 @@
 import { Home, User, Calendar, LogOut } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../redux/slices/AuthSlice"; // <-- async thunk for logout
 
@@ -20,7 +20,6 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
   };
 
   return (
-
     <div
       className={`transition-all duration-300 h-screen bg-white shadow-md flex flex-col fixed left-0 top-0 
     ${expanded || isLocked ? "w-65" : "w-20"}
@@ -43,54 +42,76 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
         <ul className="space-y-3">
           {/* Dashboard */}
           <li>
-            <Link
+            <NavLink
               to="/dashboard"
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50"
+              end
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-2 transition-colors
+       ${
+         isActive ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-blue-50"
+       }`
+              }
             >
-              <Home size={20} className="text-gray-600 shrink-0" />
+              <Home size={20} className="shrink-0" />
+
               {(expanded || isLocked) && (
-                <span className="text-gray-700 font-medium transition-all duration-300">
+                <span className="font-medium transition-all duration-300">
                   Dashboard
                 </span>
               )}
-            </Link>
+            </NavLink>
           </li>
 
           {/* Attendance */}
           <li>
-            <Link
-              to="/employees"
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50"
+            <NavLink
+              to="/attendancePage"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-2 transition-colors
+       ${
+         isActive ? "bg-blue-100 text-white" : "text-gray-700 hover:bg-blue-50"
+       }`
+              }
             >
               <Calendar size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
-                <Link to="/attendancePage" className="text-gray-700 font-medium transition-all duration-300">
+                <span className="text-gray-700 font-medium transition-all duration-300">
                   Attendance
-                </Link>
+                </span>
               )}
-            </Link>
+            </NavLink>
           </li>
 
           {/* Attendance History */}
           <li>
-            <Link
-              to="/attendance"
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50"
+            <NavLink
+              to="/myAttendance"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-2 transition-colors
+       ${
+         isActive ? "bg-blue-100 text-white" : "text-gray-700 hover:bg-blue-50"
+       }`
+              }
             >
               <Calendar size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
-                <Link to="/myAttendance" className="text-gray-700 font-medium transition-all duration-300">
+                <span className="text-gray-700 font-medium transition-all duration-300">
                   Attendance History
-                </Link>
+                </span>
               )}
-            </Link>
+            </NavLink>
           </li>
 
           {/* Profile */}
           <li>
-            <Link
-              to="/attendance"
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50"
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-2 rounded-lg transition-colors
+       ${
+         isActive ? "bg-blue-100 text-white" : "text-gray-700 hover:bg-blue-50"
+       }`
+              }
             >
               <User size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
@@ -98,7 +119,7 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
                   Profile
                 </span>
               )}
-            </Link>
+            </NavLink>
           </li>
 
           {/* Logout */}

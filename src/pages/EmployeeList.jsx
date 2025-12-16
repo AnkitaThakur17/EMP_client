@@ -14,7 +14,10 @@ const EmployeeList = () => {
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
-      <h3 className="text-2xl mb-6 text-gray-800">Employee List</h3>
+    <div className="flex justify-between">
+        <h3 className="text-2xl mb-6 text-gray-800">Employee List</h3>
+        <Link to="/create-employee" className="p-2 mb-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Create Employee</Link>
+    </div>
 
       {loading && <p>Loading...</p>}
       {!loading && employees?.length === 0 && (

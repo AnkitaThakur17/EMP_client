@@ -139,7 +139,7 @@ const CreateEmployee = () => {
   };
 
   return (
-    <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
+    <div className="flex p-20 flex-col items-center border border-gray-200 rounded-xl mt-10 bg-white">
       <h3 className="text-2xl mb-6 text-gray-800">Employee Account</h3>
 
       <form onSubmit={handleSubmit} className="max-w-2xl">
