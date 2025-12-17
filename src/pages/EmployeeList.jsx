@@ -1,16 +1,39 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getEmployees } from "../redux/slices/AdminSlice";
 import { Link } from "react-router-dom";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
+  const [nameFilter, setNameFilter] = useState("all")
+  const [teamFilter, setTeamFilter] = useState("all")
 
   const { loading, token, employees } = useSelector((state) => state.admin);
 
   useEffect(() => {
     dispatch(getEmployees(token));
   }, [dispatch, token]);
+
+  const filteredEmployee = useMemo(()=>{
+    let data = [...(employees || [])]
+
+  //Name filter
+ if(nameFilter !== "all"){
+     data = data.filter(
+      (item) => item.fullname === nameFilter
+     )
+ }
+
+ //Team filter
+ if(teamFilter !== "all"){
+    data = data.filter(
+      (item) => item.team === teamFilter
+    )
+ }
+ return data;
+  }, [employees, nameFilter, teamFilter]);
+
+
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
