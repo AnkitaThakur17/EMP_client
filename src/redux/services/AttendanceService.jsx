@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getErrorMessage } from "../../../utils/errorCodes";
 
-const API_URL = "http://192.168.1.72:3300/attendance";
+const API_URL = "http://192.168.1.86:3300/attendance";
 
 const baseHeaders = {
   "api-key": "NtE]yUS%tF7eqAePNT6|WWlQxhJQNgb8,)M*|y8y59HkAv6nZs",

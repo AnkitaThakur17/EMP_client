@@ -42,11 +42,10 @@ const AttendancePage = () => {
     const payload = {
       userId: user?.user_id,
       punchDate: new Date().toISOString().split("T")[0],
-      punchInTime: new Date().toLocaleTimeString("en-US", {
-        hour12: false,
+      punchInTime: new Date().toLocaleTimeString("en-US", "en-US", {
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
+        hour12: true,
       }),
       punchType: "WEB",
       punctualStatus: "On-Time",

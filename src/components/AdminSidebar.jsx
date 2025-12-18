@@ -65,7 +65,7 @@ export default function AdminSidebar({
        }`
               }
             >
-              <Home size={20} className="shrink-0 mr-4" />
+              <Home size={20} className="shrink-0 mr-2" />
 
               {(expanded || isLocked) && (
                 <span className="font-medium transition-all duration-300">

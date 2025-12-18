@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getErrorMessage } from "../../../utils/errorCodes";
 
-const API_URL = "http://192.168.1.72:3300/user";
+const API_URL = "http://192.168.1.86:3300/user";
 
 const baseHeaders = {
   "device-id": "12345",

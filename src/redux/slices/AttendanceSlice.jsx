@@ -92,7 +92,7 @@ const initialState = {
 
 // Slice
 const attendanceSlice = createSlice({
-  name: "attendance",
+  name:"attendance",
   initialState,
   reducers: {
     resetError: (state) => {
