@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { punchIn, punchOut } from "../redux/slices/AttendanceSlice";
+import { formatTime } from "../../utils/timeFormatter";
 
 const AttendancePage = () => {
   const dispatch = useDispatch();
@@ -82,9 +83,14 @@ const AttendancePage = () => {
 
         {/* Right section */}
         <ul className="space-y-2 text-gray-900">
-          <li>{attendance?.punchDate || "--"}</li>
-          <li>{attendance?.punchInTime || "--"}</li>
-          <li>{attendance?.leavingTime || "--"}</li>
+          <li>{new Date(attendance?.punchDate).toLocaleDateString("en-GB",{
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric"
+                    })}</li>
+          <li>{formatTime(attendance?.punchInTime) || "--"}</li>
+          <li>{formatTime(attendance?.leavingTime) || "--"}</li>
           <li>{attendance?.workingHours || "--"}</li>
           <li className="text-red-600">{attendance?.punctualStatus || "--"}</li>
           <li>{attendance?.punchType || "--"}</li>

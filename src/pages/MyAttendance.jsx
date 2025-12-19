@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { myAttendance } from "../redux/slices/AttendanceSlice";
+import { formatTime } from "../../utils/timeFormatter";
 
 const MyAttendance = () => {
   const dispatch = useDispatch();
@@ -65,14 +66,19 @@ const MyAttendance = () => {
                     : att.punctualStatus === "Late"
                     ? "text-red-600"
                     : "text-red-600";
-
+                    
                 return (
                   <tr
                     key={index}
                     className="border-b hover:bg-gray-50 transition-all"
                   >
-                    <td className="p-3">{punchDate}</td>
-                    <td className="p-3">{punchInTime}</td>
+                    <td className="px-3">{new Date(att.punchDate).toLocaleDateString("en-GB",{
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric"
+                    })}</td>
+                    <td className="p-3">{formatTime(att.punchInTime)}</td>
                     <td className="p-3">{leavingTime}</td>
                     <td className="p-3">{workingHours}</td>
                     <td className={`p-3 font-semibold ${statusColor}`}>

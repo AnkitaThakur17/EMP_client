@@ -13,17 +13,18 @@ const EmployeeList = () => {
     (state) => state.admin
   );
 
-  // Pagination
+  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
+  // Fetch employees
   useEffect(() => {
     if (token) {
       dispatch(getEmployees(token));
     }
   }, [dispatch, token]);
 
-  // FILTER
+  // FILTER LOGIC
   const filteredEmployees = useMemo(() => {
     let data = [...(employees || [])];
 
@@ -47,21 +48,21 @@ const EmployeeList = () => {
     return data;
   }, [employees, selectedName, teamFilter]);
 
-  //pagination after filter
-  const paginatedEmployee = useMemo(()=>{
-        const startIndex = (currentPage - 1) * itemsPerPage;
+  // PAGINATION AFTER FILTER
+  const paginatedEmployees = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return filteredEmployees.slice(startIndex, endIndex)
+    return filteredEmployees.slice(startIndex, endIndex);
+  }, [filteredEmployees, currentPage]);
 
-  },[filteredEmployees, currentPage])
+  const totalPages = Math.ceil(
+    filteredEmployees.length / itemsPerPage
+  );
 
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-
-  //Reset page when filters change
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedName,teamFilter]);
-
+  }, [selectedName, teamFilter]);
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -124,57 +125,106 @@ const EmployeeList = () => {
 
       {/* TABLE */}
       {!loading && filteredEmployees.length > 0 && (
-        <table className="table-auto w-full border border-gray-300 rounded-xl border-separate">
-          <thead>
-            <tr className="bg-gray-100 text-gray-600 text-sm">
-              <th className="p-2">Employee Name</th>
-              <th className="p-2">Email Id</th>
-              <th className="p-2">Designation</th>
-              <th className="p-2">Employee Code</th>
-              <th className="p-2">Team</th>
-              <th className="p-2">DOB</th>
-              <th className="p-2">Subrole</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredEmployees.map((emp) => (
-              <tr key={emp._id} className="border-b">
-                <td className="p-3 text-gray-800">
-                  <Link
-                    to="/employeeProfile"
-                    className="text-indigo-600 hover:underline"
-                  >
-                    {emp.fullname}
-                  </Link>
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.email}
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.designation}
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.employeeCode}
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.team || "-"}
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.dob ? new Date(emp.dob).toLocaleDateString("en-GB", {
-                        weekday: "long",
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      }) : "-"}
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  {emp.subrole || "-"}
-                </td>
+        <>
+          <table className="table-auto w-full border border-gray-300 rounded-xl border-separate">
+            <thead>
+              <tr className="bg-gray-100 text-gray-600 text-sm">
+                <th className="p-2">Employee Name</th>
+                <th className="p-2">Email Id</th>
+                <th className="p-2">Designation</th>
+                <th className="p-2">Employee Code</th>
+                <th className="p-2">Team</th>
+                <th className="p-2">DOB</th>
+                <th className="p-2">Subrole</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {paginatedEmployees.map((emp) => (
+                <tr key={emp._id} className="border-b">
+                  <td className="p-3 text-gray-800">
+                    <Link
+                      to="/employeeProfile"
+                      className="text-indigo-600 hover:underline"
+                    >
+                      {emp.fullname}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.email}
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.designation}
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.employeeCode}
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.team || "-"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.dob
+                      ? new Date(emp.dob).toLocaleDateString(
+                          "en-GB",
+                          {
+                            weekday: "long",
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )
+                      : "-"}
+                  </td>
+                  <td className="px-4 py-2 text-gray-600">
+                    {emp.subrole || "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-6">
+              <button
+                disabled={currentPage === 1}
+                onClick={() =>
+                  setCurrentPage((prev) => prev - 1)
+                }
+                className="px-3 py-1 border rounded-md disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 border rounded-md ${
+                      currentPage === page
+                        ? "bg-indigo-600 text-white"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) => prev + 1)
+                }
+                className="px-3 py-1 border rounded-md disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

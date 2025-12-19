@@ -140,7 +140,7 @@ const CreateEmployee = () => {
 
   return (
     <div className="flex p-20 flex-col items-center border border-gray-200 rounded-xl mt-10 bg-white">
-      <h3 className="text-2xl mb-6 text-gray-800">Employee Account</h3>
+      <h3 className="text-2xl font-bold mb-6 text-gray-800">Employee Account</h3>
 
       <form onSubmit={handleSubmit} className="max-w-2xl">
         {/* FULLNAME + EMAIL */}
@@ -151,7 +151,7 @@ const CreateEmployee = () => {
               value={formData.fullname}
               onChange={handleChange}
               placeholder="Name"
-              className="w-full border border-gray-200 rounded-md px-3 py-2 mb-1 text-gray-800 focus:border-blue-500 outline-none"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 mb-1 text-gray-800 focus:border-blue-500 outline-none"
             />
             {error.fullname && (
               <p className="text-red-500 text-sm">{error.fullname}</p>
@@ -165,7 +165,7 @@ const CreateEmployee = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
-              className="w-full border border-gray-200 rounded-md px-3 py-2 mb-1 text-gray-800 focus:border-blue-500 outline-none"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 mb-1 text-gray-800 focus:border-blue-500 outline-none"
             />
             {error.email && (
               <p className="text-red-500 text-sm">{error.email}</p>
@@ -180,7 +180,7 @@ const CreateEmployee = () => {
           value={formData.password}
           onChange={handleChange}
           placeholder="Password"
-          className="w-full border border-gray-200 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
+          className="w-full border border-gray-400 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
         />
         {error.password && (
           <p className="text-red-500 text-sm">{error.password}</p>
@@ -194,7 +194,7 @@ const CreateEmployee = () => {
               value={formData.designation}
               onChange={handleChange}
               placeholder="Designation"
-              className="w-full border border-gray-200 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
             />
             {error.designation && (
               <p className="text-red-500 text-sm">{error.designation}</p>
@@ -207,7 +207,7 @@ const CreateEmployee = () => {
               value={formData.team}
               onChange={handleChange}
               placeholder="Team"
-              className="w-full border border-gray-200 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
             />
             {error.team && <p className="text-red-500 text-sm">{error.team}</p>}
           </div>
@@ -219,7 +219,7 @@ const CreateEmployee = () => {
           value={formData.employeeCode}
           onChange={handleChange}
           placeholder="Employee code"
-          className="w-full border border-gray-200 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
+          className="w-full border border-gray-400 rounded-md px-3 py-2 mt-4 text-gray-800 focus:border-blue-500 outline-none"
         />
         {error.employeeCode && (
           <p className="text-red-500 text-sm">{error.employeeCode}</p>
@@ -229,7 +229,7 @@ const CreateEmployee = () => {
         <div className="flex flex-row gap-5 justify-between mt-4">
           {/* DOB (DATE PICKER) */}
           <div className="w-full">
-            <div className="border border-gray-200 rounded-md px-3 py-[6px] flex items-center justify-between focus-within:border-blue-500">
+            <div className="border border-gray-400 rounded-md px-3 py-[6px] flex items-center justify-between focus-within:border-blue-500">
 
               {/* <DatePicker */}
               <DatePicker
@@ -253,7 +253,7 @@ const CreateEmployee = () => {
               name="subrole"
               value={formData.subrole}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-md px-3 py-2 text-gray-400 bg-white focus:border-blue-500 outline-none"
+              className="w-full border border-gray-400 rounded-md px-3 py-2 text-gray-400 bg-white focus:border-blue-500 outline-none"
             >
               <option value="">Select subrole</option>
               <option value="HR">HR</option>
