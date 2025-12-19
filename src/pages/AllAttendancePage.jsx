@@ -59,7 +59,6 @@ const AllAttendancePage = () => {
         (a, b) => new Date(b.punchDate) - new Date(a.punchDate)
       );
     }
-
     return data;
   }, [attendanceList, sortBy, statusFilter, teamFilter, selectedDate]);
 

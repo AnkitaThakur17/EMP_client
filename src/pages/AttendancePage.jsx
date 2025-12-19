@@ -83,12 +83,14 @@ const AttendancePage = () => {
 
         {/* Right section */}
         <ul className="space-y-2 text-gray-900">
-          <li>{new Date(attendance?.punchDate).toLocaleDateString("en-GB",{
-                      weekday: "long",
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric"
-                    })}</li>
+          <li>
+            {new Date(attendance?.punchDate).toLocaleDateString("en-GB", {
+              weekday: "long",
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </li>
           <li>{formatTime(attendance?.punchInTime) || "--"}</li>
           <li>{formatTime(attendance?.leavingTime) || "--"}</li>
           <li>{attendance?.workingHours || "--"}</li>

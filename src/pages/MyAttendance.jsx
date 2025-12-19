@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { myAttendance } from "../redux/slices/AttendanceSlice";
 import { formatTime } from "../../utils/timeFormatter";
@@ -8,14 +8,34 @@ const MyAttendance = () => {
   const {
     loading,
     token,
-    myAttendance: data,
+    myAttendance: data = [],
     error,
   } = useSelector((state) => state.attendance);
-  // console.log("Attendance Data:", data);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  const paginatedData = useMemo(()=>{
+
+     if (!Array.isArray(data)) return [];
+
+    const startIndex = (currentPage -1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return data.slice(startIndex, endIndex)
+  },[data, currentPage]) 
+
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
 
   useEffect(() => {
     if (token) dispatch(myAttendance(token));
   }, [token, dispatch]);
+
+  //paginate
+  useEffect(() => {
+  setCurrentPage(1);
+}, [data]);
 
   return (
     <div className="p-10 bg-white border border-gray-200 rounded-xl mt-10 shadow-sm">
@@ -55,7 +75,7 @@ const MyAttendance = () => {
             </thead>
 
             <tbody>
-              {data.map((att, index) => {
+              {paginatedData.map((att, index) => {
                 const punchDate = new Date(att.punchDate).toLocaleDateString();
                 const punchInTime = att.punchInTime || "-";
                 const leavingTime = att.leavingTime || "-";
@@ -66,18 +86,20 @@ const MyAttendance = () => {
                     : att.punctualStatus === "Late"
                     ? "text-red-600"
                     : "text-red-600";
-                    
+
                 return (
                   <tr
                     key={index}
                     className="border-b hover:bg-gray-50 transition-all"
                   >
-                    <td className="px-3">{new Date(att.punchDate).toLocaleDateString("en-GB",{
-                      weekday: "long",
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric"
-                    })}</td>
+                    <td className="px-3">
+                      {new Date(att.punchDate).toLocaleDateString("en-GB", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
                     <td className="p-3">{formatTime(att.punchInTime)}</td>
                     <td className="p-3">{leavingTime}</td>
                     <td className="p-3">{workingHours}</td>
@@ -89,6 +111,42 @@ const MyAttendance = () => {
               })}
             </tbody>
           </table>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-2 mt-6 mb-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                className="px-3 py-1 border rounded disabled:opacity-40"
+              >
+                Prev
+              </button>
+
+              {[...Array(totalPages)].map((_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1 border rounded ${
+                      currentPage === page ? "bg-indigo-600 text-white" : ""
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                className="px-3 py-1 border rounded disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
