@@ -5,10 +5,13 @@ import adminService from "../services/AdminService";
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem("user");
-    if (!stored || stored === "undefined") return null;
+    if (!stored || stored === "undefined") {
+      localStorage.removeItem("user"); 
+      return null;
+    }
     return JSON.parse(stored);
   } catch (err) {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user"); 
     return null;
   }
 };

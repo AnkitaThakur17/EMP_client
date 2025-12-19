@@ -19,7 +19,6 @@ const login = async (email, password) => {
       { email, password },
       { headers: baseHeaders }
     );
-
     return {
       status: response.status,
       message: response.data.message || "Login successful",

@@ -5,14 +5,18 @@ import attendanceService from "../services/AttendanceService";
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem("user");
-    if (!stored || stored === "undefined") return null;
+
+    if (!stored || stored === "undefined") {
+      localStorage.removeItem("user"); 
+      return null;
+    }
+
     return JSON.parse(stored);
   } catch (err) {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user"); 
     return null;
   }
 };
-
 // Async thunk
 export const punchIn = createAsyncThunk(
   "attendance/punchIn",

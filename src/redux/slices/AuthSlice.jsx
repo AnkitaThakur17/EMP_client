@@ -1,17 +1,20 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import authService from "../services/AuthService";
 
-// Safe localStorage parse
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem("user");
-    if (!stored || stored === "undefined") return null;
+    if (!stored || stored === "undefined") {
+      localStorage.removeItem("user"); 
+      return null;
+    }
     return JSON.parse(stored);
   } catch (err) {
-    localStorage.removeItem("user");
+    localStorage.removeItem("user"); 
     return null;
   }
 };
+
 
 //LOGIN
 export const loginUser = createAsyncThunk(
@@ -29,24 +32,23 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// LOGOUT
 export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token || localStorage.getItem("token");
-      if (!token) throw new Error("No token found");
-
-      const response = await authService.logout(token);
-      return response;
+      const token = localStorage.getItem("token");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      if (token) {
+        await authService.logout(token);
+      }
+      return true;
     } catch (error) {
-      return rejectWithValue({
-        code: error.code || 500,
-        message: error.message || "Logout failed",
-      });
+      return true;
     }
   }
 );
+
 
 // STATE
 const initialState = {

@@ -8,6 +8,7 @@ const EmployeeList = () => {
 
   const [selectedName, setSelectedName] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
+  const [selectedEmail, setSelectedEmail] = useState("")
 
   const { loading, token, employees } = useSelector(
     (state) => state.admin
@@ -38,6 +39,16 @@ const EmployeeList = () => {
       );
     }
 
+    //email filter
+    if (selectedEmail){
+      const search = selectedEmail.toLowerCase();
+      data = data.filter(
+        (item)=>{
+         return item.email?.toLowerCase().includes(search)
+        }
+      )
+    }
+
     // Team filter
     if (teamFilter !== "all") {
       data = data.filter(
@@ -46,7 +57,7 @@ const EmployeeList = () => {
     }
 
     return data;
-  }, [employees, selectedName, teamFilter]);
+  }, [employees, selectedName, teamFilter, selectedEmail]);
 
   // PAGINATION AFTER FILTER
   const paginatedEmployees = useMemo(() => {
@@ -62,7 +73,7 @@ const EmployeeList = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedName, teamFilter]);
+  }, [selectedName, teamFilter, selectedEmail]);
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -95,6 +106,21 @@ const EmployeeList = () => {
             onChange={(e) => setSelectedName(e.target.value)}
           />
         </div>
+
+        {/* Email Filter */}
+          <div className="flex flex-col w-64">
+          <label className="text-gray-600 mb-1">
+            Email
+          </label>
+          <input
+            type="text"
+            className="border px-3 py-2 w-full rounded-md text-sm"
+            placeholder="Search by email"
+            value={selectedEmail}
+            onChange={(e) => setSelectedEmail(e.target.value)}
+          />
+        </div>
+
 
         {/* Team Filter */}
         <div className="flex flex-col w-64">
