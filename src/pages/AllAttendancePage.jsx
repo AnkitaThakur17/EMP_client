@@ -14,8 +14,9 @@ const AllAttendancePage = () => {
   const [sortBy, setSortBy] = useState("date");
   const [statusFilter, setStatusFilter] = useState("all");
   const [teamFilter, setTeamFilter] = useState("all");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedName, setSelectedName] = useState("")
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [selectedName, setSelectedName] = useState("");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,55 +28,53 @@ const AllAttendancePage = () => {
     }
   }, [dispatch, token]);
 
-  //FILTER + SORT
+  // FILTER + SORT
   const filteredAttendance = useMemo(() => {
     let data = [...(attendanceList || [])];
 
-    // Date filter
-    if (selectedDate) {
-      data = data.filter(
-        (item) =>
-          item.punchDate &&
-          new Date(item.punchDate).toLocaleDateString("en-CA") === selectedDate
-      );
+    // Date range filter
+    if (fromDate || toDate) {
+      data = data.filter((item) => {
+        if (!item.punchDate) return false;
+        const punchDate = new Date(item.punchDate);
+        const from = fromDate ? new Date(fromDate) : null;
+        const to = toDate ? new Date(toDate) : null;
+
+        if (from && to) return punchDate >= from && punchDate <= to;
+        if (from) return punchDate >= from;
+        if (to) return punchDate <= to;
+        return true;
+      });
     }
 
-  if (selectedName.trim()) {
-  const search = selectedName.trim().toLowerCase();
-
-  data = data.filter((item) => {
-    const name =
-      item.employee?.fullName ||
-      item.employee?.fullname ||
-      "";
-    return name.toLowerCase().includes(search);
-  });
-}
+    // Name search
+    if (selectedName.trim()) {
+      const search = selectedName.trim().toLowerCase();
+      data = data.filter((item) => {
+        const name = item.employee?.fullName || item.employee?.fullname || "";
+        return name.toLowerCase().includes(search);
+      });
+    }
 
     // Status filter
     if (statusFilter !== "all") {
-      data = data.filter(
-        (item) => item.punctualStatus === statusFilter
-      );
+      data = data.filter((item) => item.punctualStatus === statusFilter);
     }
 
     // Team filter
     if (teamFilter !== "all") {
-      data = data.filter(
-        (item) => item.employee?.team === teamFilter
-      );
+      data = data.filter((item) => item.employee?.team === teamFilter);
     }
 
     // Sort by date
     if (sortBy === "date") {
-      data.sort(
-        (a, b) => new Date(b.punchDate) - new Date(a.punchDate)
-      );
+      data.sort((a, b) => new Date(b.punchDate) - new Date(a.punchDate));
     }
-    return data;
-  }, [attendanceList, sortBy, statusFilter, teamFilter, selectedDate, selectedName]);
 
-  //PAGINATION (AFTER FILTER)
+    return data;
+  }, [attendanceList, sortBy, statusFilter, teamFilter, fromDate, toDate, selectedName]);
+
+  // PAGINATION
   const paginatedAttendance = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -84,10 +83,10 @@ const AllAttendancePage = () => {
 
   const totalPages = Math.ceil(filteredAttendance.length / itemsPerPage);
 
-  //Reset page when filters change
+  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, teamFilter, selectedDate, selectedName]);
+  }, [statusFilter, teamFilter, fromDate, toDate, selectedName]);
 
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -96,32 +95,49 @@ const AllAttendancePage = () => {
       </h3>
 
       {/* FILTER BAR */}
-      <div className="flex gap-4 mb-6 justify-between">
-       <div className="flex flex-col w-64">
-       <label className="text-gray-600">
-       Name
-       <input
-         type="text"
-         className="border px-3 py-2 w-full rounded-md text-sm"
-         placeholder="Search by name"
-         value={selectedName}
-         onChange={(e) => setSelectedName(e.target.value)}
-       />
-       </label>
-       </div>
+      <div className="flex flex-row gap-4 mb-6 flex-wrap">
 
+        {/* Name */}
         <div className="flex flex-col w-64">
           <label className="text-gray-600">
-            Date
+            Name
             <input
-              type="date"
+              type="text"
               className="border px-3 py-2 w-full rounded-md text-sm"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              placeholder="Search by name"
+              value={selectedName}
+              onChange={(e) => setSelectedName(e.target.value)}
             />
           </label>
         </div>
 
+        {/* From Date */}
+        <div className="flex flex-col w-64">
+          <label className="text-gray-600">
+            From
+            <input
+              type="date"
+              className="border px-3 py-2 w-full rounded-md text-sm"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {/* To Date */}
+        <div className="flex flex-col w-64">
+          <label className="text-gray-600">
+            To
+            <input
+              type="date"
+              className="border px-3 py-2 w-full rounded-md text-sm"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+            />
+          </label>
+        </div>
+
+        {/* Status */}
         <div className="flex flex-col w-64">
           <label className="text-gray-600">
             Status
@@ -138,6 +154,7 @@ const AllAttendancePage = () => {
           </label>
         </div>
 
+        {/* Team */}
         <div className="flex flex-col w-64">
           <label className="text-gray-600">
             Team
@@ -175,7 +192,6 @@ const AllAttendancePage = () => {
                 <th className="p-2">Status</th>
               </tr>
             </thead>
-
             <tbody>
               {paginatedAttendance.map((emp) => (
                 <tr key={emp._id} className="border-b">

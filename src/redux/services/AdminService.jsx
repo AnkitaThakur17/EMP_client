@@ -1,20 +1,12 @@
-import axios from "axios";
 import { getErrorMessage } from "../../../utils/errorCodes";
+import axiosInstance from "./axioInstance";
 
 const API_URL = "http://192.168.1.86:3300/user/admin";
-
-const baseHeaders = {
-  "api-key": "NtE]yUS%tF7eqAePNT6|WWlQxhJQNgb8,)M*|y8y59HkAv6nZs",
-  "device-id": "12345",
-  "device-token": "abcxyz",
-  "device-type": "android",
-  "Content-Type": "application/json",
-};
 
 //create employee
 const createEmployee = async (employeeData, token) => {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       `${API_URL}/createEmployee`,
       employeeData,
       {
@@ -51,15 +43,12 @@ const createEmployee = async (employeeData, token) => {
   }
 };
 
-//get employees
-const getEmployees = async (token) => {
+// get employees
+const getEmployees = async () => {
   try {
-    const response = await axios.get(`${API_URL}/getEmployees`, {
-      headers: {
-        ...baseHeaders,
-        "access-token": token,
-      },
-    });
+    const response = await axiosInstance.get(
+      "/user/admin/getEmployees"
+    );
 
     return {
       status: response.status,
@@ -69,11 +58,9 @@ const getEmployees = async (token) => {
   } catch (error) {
     if (error.response) {
       const backendCode = error.response.data.code;
-      const finalMsg = getErrorMessage(backendCode);
-
       throw {
         code: backendCode,
-        message: finalMsg,
+        message: getErrorMessage(backendCode),
         status: error.response.status,
         data: error.response.data.data || null,
       };
@@ -85,12 +72,12 @@ const getEmployees = async (token) => {
 
     throw { code: 0, message: error.message || "An error occurred" };
   }
-};
+}
 
 //get employee
 const getEmployee = async (userId, token) => {
   try {
-    const response = await axios.get(`${API_URL}/getEmployee/${userId}`, {
+    const response = await axiosInstance.get(`${API_URL}/getEmployee/${userId}`, {
       headers: {
         ...baseHeaders,
         "access-token": token,
