@@ -1,119 +1,128 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import attendanceService from "../services/AttendanceService";
 
-// Safe localStorage parse
 const getStoredUser = () => {
   try {
     const stored = localStorage.getItem("user");
-
     if (!stored || stored === "undefined") {
       localStorage.removeItem("user"); 
       return null;
     }
-
     return JSON.parse(stored);
   } catch (err) {
     localStorage.removeItem("user"); 
     return null;
   }
 };
-// Async thunk
+
+// Async thunks
 export const punchIn = createAsyncThunk(
   "attendance/punchIn",
-  async ({ punchInData, token }, { rejectWithValue }) => {
+  async ({ punchInData }, { rejectWithValue }) => {
     try {
-      const response = await attendanceService.punchIn(punchInData, token);
-      return response;
+      return await attendanceService.punchIn(punchInData);
     } catch (error) {
-      return rejectWithValue({
-        code: error.code || 0,
-        message: error.message || "Something went wrong",
-      });
+      return rejectWithValue(error);
     }
   }
 );
 
-//punchOut
 export const punchOut = createAsyncThunk(
   "attendance/punchOut",
-  async ({ punchOutData, token }, { rejectWithValue }) => {
+  async ({ punchOutData }, { rejectWithValue }) => {
     try {
-      const response = await attendanceService.punchOut(punchOutData, token);
-      return response;
+      return await attendanceService.punchOut(punchOutData);
     } catch (error) {
-      return rejectWithValue({
-        code: error.code || 0,
-        message: error.message || "Something went wrong",
-      });
+      return rejectWithValue(error);
     }
   }
 );
 
-//myAttendance
 export const myAttendance = createAsyncThunk(
   "attendance/myAttendance",
-  async (token, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await attendanceService.myAttendance(token);
-      return response;
+      return await attendanceService.myAttendance();
     } catch (error) {
-      return rejectWithValue({
-        code: error.code || 0,
-        message: error.message || "Something went wrong",
-      });
+      return rejectWithValue(error);
     }
   }
 );
 
-//allAttendance
 export const allAttendance = createAsyncThunk(
   "attendance/allAttendance",
-  async(token,{ rejectWithValue }) => {
+  async (
+    { pageNo, limit, search, teamFilter, statusFilter, startDate, endDate },
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await attendanceService.allAttendance(token);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue({
-        code: error.code || 0,
-        message: error.message || "Something went wrong",
+      return await attendanceService.allAttendance({
+        pageNo,
+        limit,
+        search,
+        teamFilter,
+        statusFilter,
+        startDate,
+        endDate,
       });
+    } catch (error) {
+      return rejectWithValue(error);
     }
   }
-)
-
-
+);
 // Initial state
 const initialState = {
+
   user: getStoredUser(),
   token: localStorage.getItem("token") || null,
+
   loading: false,
   error: null,
-  punchInData: null, // store punchIn response
-  data: [],
-  employees: [],
+
+  punchInData: null,
+  punchOutData: null,
+
+  myAttendance: [],
   allAttendance: [],
+
+  pageNo: 1,
+  limit: 5,
+  // totalPages: 2,
+
+  search: "",
+  filters: {
+    team: "",
+    status: "",
+    startDate: "",
+    endDate: ""
+  },
 };
 
 // Slice
 const attendanceSlice = createSlice({
-  name:"attendance",
+  name: "attendance",
   initialState,
   reducers: {
+    setTeamFilter: (state, action) => {
+      state.filters.team = action.payload;
+      state.pageNo = 1;
+    },
+    setStatusFilter: (state, action) => {
+      state.filters.status = action.payload;
+      state.pageNo = 1;
+    },
+    setPageNo: (state, action) => {
+      state.pageNo = action.payload;
+    },
     resetError: (state) => {
       state.error = null;
-    },
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
     builder
+      // punchIn
       .addCase(punchIn.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(punchIn.fulfilled, (state, action) => {
         state.loading = false;
@@ -121,16 +130,12 @@ const attendanceSlice = createSlice({
       })
       .addCase(punchIn.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || {
-          code: 0,
-          message: "Failed to punch in",
-        };
+        state.error = action.payload;
       })
 
-      //punchOut
+      // punchOut
       .addCase(punchOut.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(punchOut.fulfilled, (state, action) => {
         state.loading = false;
@@ -138,55 +143,47 @@ const attendanceSlice = createSlice({
       })
       .addCase(punchOut.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || {
-          code: 0,
-          message: "failed to punch out",
-        };
+        state.error = action.payload;
       })
 
-      //myAttendance
+      // myAttendance
       .addCase(myAttendance.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-
       .addCase(myAttendance.fulfilled, (state, action) => {
         state.loading = false;
-
-        const result = action.payload.data;
-
-        // Ensure the data is always an array
-        state.myAttendance = Array.isArray(result) ? result : [result];
+        state.myAttendance = Array.isArray(action.payload.data)
+          ? action.payload.data
+          : [action.payload.data];
       })
-      // .addCase(myAttendance.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.myAttendance = action.payload.data
-      // })
       .addCase(myAttendance.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || {
-          code: 0,
-          message: "failed to load my attendance",
-        };
+        state.error = action.payload;
       })
-      //allAttendance
-      .addCase(allAttendance.pending,(state, action)=>{
+
+      // allAttendance
+      .addCase(allAttendance.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
-      .addCase(allAttendance.fulfilled,(state, action)=>{
+
+      .addCase(allAttendance.fulfilled, (state, action) => {
         state.loading = false;
-        state.allAttendance = action.payload
+        // backend rray
+        state.allAttendance = action.payload.data;
+        console.log("allAttendance", allAttendance)
+
+        // frontend-only pagination
+        state.totalPages = Math.ceil(action.payload.data.length / state.limit);
       })
-      .addCase(allAttendance.rejected, (state, action)=>{
+
+      .addCase(allAttendance.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || {
-          code:0,
-          message: "failed to load all attendance",
-        }
-      })
+        state.error = action.payload;
+      });
   },
 });
 
-export const { resetError, logout } = attendanceSlice.actions;
+export const { setTeamFilter, setStatusFilter, setPageNo, resetError } =
+  attendanceSlice.actions;
+
 export default attendanceSlice.reducer;

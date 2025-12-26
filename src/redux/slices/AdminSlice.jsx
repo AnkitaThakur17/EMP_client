@@ -32,13 +32,18 @@ export const createEmployee = createAsyncThunk(
   }
 );
 
-//get employees
 export const getEmployees = createAsyncThunk(
   "admin/getEmployees",
-  async (token, { rejectWithValue }) => {
+  async ({ token, pageNo, limit, search, teamFilter }, { rejectWithValue }) => {
     try {
-      const response = await adminService.getEmployees(token);
-      return response; // array of employees
+      const response = await adminService.getEmployees({
+        token,
+        pageNo,
+        limit,
+        search,
+        teamFilter
+      });
+      return response;
     } catch (error) {
       return rejectWithValue({
         code: error.code,
@@ -71,12 +76,25 @@ const initialState = {
   error: null,
   employees: [],
   employee: null,
+  pageNo: 1,
+  limit: 5,
+  totalPages: 0,
+  search: "",
+  filters :{
+    team: ""
+  }
 };
 
 const adminSlice = createSlice({
   name: "admin",
   initialState,
-  reducers: {},
+
+  reducers: {
+    setTeamFilter: (state, action) => {
+    state.filters.team = action.payload;
+    state.pageNo = 1;
+  },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -97,7 +115,7 @@ const adminSlice = createSlice({
         state.error = action.payload;
       })
 
-      //get Employees
+      //get all employees
       .addCase(getEmployees.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -105,9 +123,13 @@ const adminSlice = createSlice({
 
       .addCase(getEmployees.fulfilled, (state, action) => {
         state.loading = false;
-        state.employees = action.payload.data.employees;
-      })
 
+        const { employees, count } = action.payload.data;
+
+        state.employees = employees;
+        state.totalPages = Math.ceil(count / state.limit);
+      })
+      
       .addCase(getEmployees.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -130,5 +152,5 @@ const adminSlice = createSlice({
       });
   },
 });
-
+export const { setTeamFilter } = adminSlice.actions;
 export default adminSlice.reducer;

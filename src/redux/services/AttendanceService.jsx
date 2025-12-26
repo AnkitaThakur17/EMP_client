@@ -53,9 +53,19 @@ const myAttendance = async () => {
 };
 
 // allAttendance
-const allAttendance = async () => {
+const allAttendance = async ({ pageNo, limit, search, teamFilter, startDate, endDate, statusFilter }) => {
   try {
-    const response = await axiosInstance.get("/attendance/allAttendance");
+    const response = await axiosInstance.get("/attendance/allAttendance", {
+      params: {
+        pageNo,
+        limit,
+        search,
+        teamFilter,
+        startDate,
+        endDate,
+        statusFilter,
+      },
+    });
 
     return {
       status: response.status,
@@ -66,6 +76,7 @@ const allAttendance = async () => {
     handleError(error);
   }
 };
+
 const handleError = (error) => {
   if (error.response) {
     const backendCode = error.response.data.code;

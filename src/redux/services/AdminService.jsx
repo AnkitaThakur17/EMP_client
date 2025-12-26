@@ -44,10 +44,18 @@ const createEmployee = async (employeeData, token) => {
 };
 
 // get employees
-const getEmployees = async () => {
+const getEmployees = async ({ token, pageNo, limit, search, teamFilter }) => {
   try {
     const response = await axiosInstance.get(
-      "/user/admin/getEmployees"
+      "/user/admin/getEmployees",
+      {
+        params: {
+          pageNo,   
+          limit,
+          search,
+          teamFilter  
+        }
+      }
     );
 
     return {
@@ -72,7 +80,22 @@ const getEmployees = async () => {
 
     throw { code: 0, message: error.message || "An error occurred" };
   }
-}
+};
+
+// const getEmployees = async ({ token, pageNo, limit, search, filters, team }) => {
+//   const response = await axiosInstance.get(
+//     "/user/admin/getEmployees",
+//     {
+//       params: {
+//         pageNo,
+//         limit,
+//         search,
+//         team,
+//         ...filters
+//       }
+//     }
+//   );
+// };
 
 //get employee
 const getEmployee = async (userId, token) => {
