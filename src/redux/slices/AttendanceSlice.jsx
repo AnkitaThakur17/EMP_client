@@ -87,7 +87,7 @@ const initialState = {
 
   pageNo: 1,
   limit: 5,
-  // totalPages: 2,
+  totalPages: 0,
 
   search: "",
   filters: {
@@ -165,15 +165,11 @@ const attendanceSlice = createSlice({
       .addCase(allAttendance.pending, (state) => {
         state.loading = true;
       })
-
       .addCase(allAttendance.fulfilled, (state, action) => {
         state.loading = false;
-        // backend rray
         state.allAttendance = action.payload.data;
-        console.log("allAttendance", allAttendance)
-
-        // frontend-only pagination
-        state.totalPages = Math.ceil(action.payload.data.length / state.limit);
+        state.count = action.payload.data.count;
+        state.totalPages = Math.ceil(action.payload.data.count / state.limit);
       })
 
       .addCase(allAttendance.rejected, (state, action) => {

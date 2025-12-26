@@ -6,36 +6,44 @@ import { Link } from "react-router-dom";
 const EmployeeList = () => {
   const dispatch = useDispatch();
 
-  // Filters (only UI state)
+  // UI state
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { loading, token, employees, totalPages, pageNo, limit } = useSelector(
+  // debounce state
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const { loading, token, employees, totalPages } = useSelector(
     (state) => state.admin
   );
 
-  // Fetch employees from backend
+  //  DEBOUNCE SEARCH
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+  if (currentPage !== 1) setCurrentPage(1);
+}, [search, teamFilter]);
+
+  //  API CALL 
   useEffect(() => {
     if (token) {
       dispatch(
         getEmployees({
           token,
-          pageNo,
-          limit,
-          search,
+          pageNo: currentPage,
+          search: debouncedSearch,
           teamFilter: teamFilter === "all" ? "" : teamFilter,
         })
       );
     }
-  }, [dispatch, token, currentPage, search, teamFilter]);
-
-  // Reset page on filter/search change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, teamFilter]);
+  }, [dispatch, token, currentPage, debouncedSearch, teamFilter]);
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -53,7 +61,6 @@ const EmployeeList = () => {
 
       {/* FILTER BAR */}
       <div className="flex gap-4 mb-6">
-        {/* Search */}
         <div className="flex flex-col w-64">
           <label className="text-gray-600 mb-1">Search</label>
           <input
@@ -65,7 +72,6 @@ const EmployeeList = () => {
           />
         </div>
 
-        {/* Team Filter */}
         <div className="flex flex-col w-64">
           <label className="text-gray-600 mb-1">Team</label>
           <select
@@ -81,17 +87,21 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* STATES */}
-      {loading && <p>Loading...</p>}
-
+      {/* EMPTY STATE */}
       {!loading && employees.length === 0 && (
         <p className="text-gray-500">No employees found</p>
       )}
 
       {/* TABLE */}
-      {!loading && employees.length > 0 && (
-        <>
-          <table className="table-auto w-full border border-gray-300 rounded-xl">
+      {employees.length > 0 && (
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+              Loading...
+            </div>
+          )}
+
+          <table className="table-auto w-full min-h-[300px] border border-gray-300 rounded-xl">
             <thead>
               <tr className="bg-gray-100 text-gray-600 text-sm">
                 <th className="p-2">Employee Name</th>
@@ -115,56 +125,57 @@ const EmployeeList = () => {
                       {emp.fullname}
                     </Link>
                   </td>
-                  <td className="px-4 py-2 text-gray-600">{emp.email}</td>
-                  <td className="px-4 py-2 text-gray-600">{emp.designation}</td>
-                  <td className="px-4 py-2 text-gray-600">{emp.employeeCode}</td>
-                  <td className="px-4 py-2 text-gray-600">{emp.team || "-"}</td>
-                  <td className="px-4 py-2 text-gray-600">
+                  <td className="px-4 py-2">{emp.email}</td>
+                  <td className="px-4 py-2">{emp.designation}</td>
+                  <td className="px-4 py-2">{emp.employeeCode}</td>
+                  <td className="px-4 py-2">{emp.team || "-"}</td>
+                  <td className="px-4 py-2">
                     {emp.dob
                       ? new Date(emp.dob).toLocaleDateString("en-GB")
                       : "-"}
                   </td>
-                  <td className="px-4 py-2 text-gray-600">{emp.subrole || "-"}</td>
+                  <td className="px-4 py-2">{emp.subrole || "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
 
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-3 py-1 border rounded-md disabled:opacity-40"
-              >
-                Prev
-              </button>
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-6">
+          <button
+            disabled={loading || currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-3 py-1 border rounded-md disabled:opacity-40"
+          >
+            Prev
+          </button>
 
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 border rounded-md ${
-                    currentPage === i + 1
-                      ? "bg-indigo-600 text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              disabled={loading}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 border rounded-md ${
+                currentPage === i + 1
+                  ? "bg-indigo-600 text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
 
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-3 py-1 border rounded-md disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
+          <button
+            disabled={loading || currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-3 py-1 border rounded-md disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
       )}
     </div>
   );
