@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allAttendance } from "../redux/slices/AttendanceSlice";
 import { formatTime } from "../../utils/timeFormatter";
+import FilterActions from "../components/FilterActions";
 
 const AllAttendancePage = () => {
   const dispatch = useDispatch();
@@ -67,6 +68,25 @@ const AllAttendancePage = () => {
 
   const records = attendance?.attendance || [];
 
+  //variable for all the filters
+  const hasActiveFilters =
+  !!search ||
+  !!teamFilter ||
+  !!fromFilter ||
+  !!toFilter;
+
+    //Filter actions
+  const handleApplyFilters = () => {
+    setCurrentPage(1);
+  };
+
+const handleResetFilters = () => {
+  setSearch("");
+  setTeamFilter("");
+  setFromFilter("");
+  setToFilter("");
+  setCurrentPage(1);
+};
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
       <h3 className="text-2xl mb-6 text-gray-800 font-semibold">
@@ -135,12 +155,21 @@ const AllAttendancePage = () => {
         </div>
       </div>
 
+      {/* FILTER ACTIONS */}
+      <FilterActions
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+        isApplyDisabled={!hasActiveFilters}
+        isResetDisabled={!hasActiveFilters}
+        loading={loading}
+      />
+
       {/* EMPTY STATE */}
       {!loading && records.length === 0 && (
         <p className="text-gray-500">No attendance records found</p>
       )}
 
-      {/* TABLE (NO BLINK) */}
+      {/* TABLE */}
       {records.length > 0 && (
         <div className="relative">
           {loading && (
@@ -172,9 +201,7 @@ const AllAttendancePage = () => {
                     {emp.fullname || emp.fullName || "N/A"}
                   </td>
                   <td className="px-4 py-2">{emp.team || "-"}</td>
-                  <td className="px-4 py-2">
-                    {formatTime(emp.punchInTime)}
-                  </td>
+                  <td className="px-4 py-2">{formatTime(emp.punchInTime)}</td>
                   <td className="px-4 py-2">{emp.leavingTime || "-"}</td>
                   <td className="px-4 py-2">{emp.workingHours || "-"}</td>
                   <td className="px-4 py-2">{emp.punctualStatus || "-"}</td>
@@ -185,7 +212,7 @@ const AllAttendancePage = () => {
         </div>
       )}
 
-       {/* PAGINATION  */}
+      {/* PAGINATION  */}
       {totalPages > 1 && (
         <div className="flex justify-end gap-2 mt-6">
           <button

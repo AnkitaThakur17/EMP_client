@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { getEmployees } from "../redux/slices/AdminSlice";
 import { Link } from "react-router-dom";
+import FilterActions from "../components/FilterActions";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const EmployeeList = () => {
     (state) => state.admin
   );
 
-  //  DEBOUNCE SEARCH
+  // DEBOUNCE SEARCH
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -27,11 +28,12 @@ const EmployeeList = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  //Reset page when filters change
   useEffect(() => {
-  if (currentPage !== 1) setCurrentPage(1);
-}, [search, teamFilter]);
+    if (currentPage !== 1) setCurrentPage(1);
+  }, [search, teamFilter]);
 
-  //  API CALL 
+  // API CALL
   useEffect(() => {
     if (token) {
       dispatch(
@@ -39,11 +41,22 @@ const EmployeeList = () => {
           token,
           pageNo: currentPage,
           search: debouncedSearch,
-          teamFilter: teamFilter === "all" ? "" : teamFilter,
+          teamFilter,
         })
       );
     }
   }, [dispatch, token, currentPage, debouncedSearch, teamFilter]);
+
+  //Filter actions
+  const handleApplyFilters = () => {
+    setCurrentPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setTeamFilter("");
+    setCurrentPage(1);
+  };
 
   return (
     <div className="flex p-10 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -60,7 +73,7 @@ const EmployeeList = () => {
       </div>
 
       {/* FILTER BAR */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-4">
         <div className="flex flex-col w-64">
           <label className="text-gray-600 mb-1">Search</label>
           <input
@@ -87,14 +100,23 @@ const EmployeeList = () => {
         </div>
       </div>
 
+      {/* FILTER ACTIONS */}
+      <FilterActions
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+        isApplyDisabled={!search && !teamFilter}
+        isResetDisabled={!search && !teamFilter}
+        loading={loading}
+      />
+
       {/* EMPTY STATE */}
       {!loading && employees.length === 0 && (
-        <p className="text-gray-500">No employees found</p>
+        <p className="text-gray-500 mt-6">No employees found</p>
       )}
 
       {/* TABLE */}
       {employees.length > 0 && (
-        <div className="relative">
+        <div className="relative mt-6">
           {loading && (
             <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
               Loading...
