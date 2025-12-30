@@ -129,7 +129,7 @@ const adminSlice = createSlice({
         state.employees = employees;
         state.totalPages = Math.ceil(count / state.limit);
       })
-      
+
       .addCase(getEmployees.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

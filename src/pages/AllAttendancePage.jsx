@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allAttendance } from "../redux/slices/AttendanceSlice";
+import { getEmployee } from "../redux/slices/AdminSlice";
 import { formatTime } from "../../utils/timeFormatter";
 import FilterActions from "../components/FilterActions";
 
@@ -14,17 +15,28 @@ const AllAttendancePage = () => {
     totalPages,
   } = useSelector((state) => state.attendance);
 
-  //  FILTER STATE 
+    const { employees } = useSelector(
+    (state) => state.admin
+  );
+
+  // DRAFT FILTER STATE (UI)
   const [search, setSearch] = useState("");
-  const [teamFilter, setTeamFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [teamFilter, setTeamFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
 
-  // PAGINATION 
+  // APPLIED FILTER STATE (API)
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [appliedTeam, setAppliedTeam] = useState("");
+  const [appliedStatus, setAppliedStatus] = useState("");
+  const [appliedFrom, setAppliedFrom] = useState("");
+  const [appliedTo, setAppliedTo] = useState("");
+
+  // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
 
-  // DEBOUNCE SEARCH 
+  // DEBOUNCE SEARCH (UI only)
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
@@ -34,24 +46,19 @@ const AllAttendancePage = () => {
 
     return () => clearTimeout(timer);
   }, [search]);
-  
-  useEffect(() => {
-  if (currentPage !== 1) setCurrentPage(1);
-}, [search, teamFilter, statusFilter, toFilter, fromFilter]);
 
-
-  //  API CALL 
+  // API CALL — ONLY applied filters
   useEffect(() => {
     if (token) {
       dispatch(
         allAttendance({
           token,
           pageNo: currentPage,
-          search: debouncedSearch,
-          teamFilter: teamFilter === "all" ? "" : teamFilter.toLowerCase(),
-          statusFilter: statusFilter === "all" ? "" : statusFilter,
-          startDate: fromFilter || "",
-          endDate: toFilter || "",
+          search: appliedSearch,
+          teamFilter: appliedTeam,
+          statusFilter: appliedStatus,
+          startDate: appliedFrom,
+          endDate: appliedTo,
         })
       );
     }
@@ -59,34 +66,48 @@ const AllAttendancePage = () => {
     dispatch,
     token,
     currentPage,
-    debouncedSearch,
-    teamFilter,
-    statusFilter,
-    fromFilter,
-    toFilter,
+    appliedSearch,
+    appliedTeam,
+    appliedStatus,
+    appliedFrom,
+    appliedTo,
   ]);
 
   const records = attendance?.attendance || [];
 
-  //variable for all the filters
-  const hasActiveFilters =
-  !!search ||
-  !!teamFilter ||
-  !!fromFilter ||
-  !!toFilter;
-
-    //Filter actions
+  // FILTER ACTIONS
   const handleApplyFilters = () => {
+    setAppliedSearch(debouncedSearch);
+    setAppliedTeam(teamFilter === "all" ? "" : teamFilter.toLowerCase());
+    setAppliedStatus(statusFilter === "all" ? "" : statusFilter);
+    setAppliedFrom(fromFilter);
+    setAppliedTo(toFilter);
     setCurrentPage(1);
   };
 
-const handleResetFilters = () => {
-  setSearch("");
-  setTeamFilter("");
-  setFromFilter("");
-  setToFilter("");
-  setCurrentPage(1);
-};
+  const handleResetFilters = () => {
+    setSearch("");
+    setTeamFilter("all");
+    setStatusFilter("all");
+    setFromFilter("");
+    setToFilter("");
+
+    setAppliedSearch("");
+    setAppliedTeam("");
+    setAppliedStatus("");
+    setAppliedFrom("");
+    setAppliedTo("");
+
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters =
+    !!appliedSearch ||
+    !!appliedTeam ||
+    !!appliedStatus ||
+    !!appliedFrom ||
+    !!appliedTo;
+
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
       <h3 className="text-2xl mb-6 text-gray-800 font-semibold">
@@ -159,7 +180,13 @@ const handleResetFilters = () => {
       <FilterActions
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
-        isApplyDisabled={!hasActiveFilters}
+        isApplyDisabled={
+          debouncedSearch === appliedSearch &&
+          (teamFilter === "all" ? "" : teamFilter.toLowerCase()) === appliedTeam &&
+          (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
+          fromFilter === appliedFrom &&
+          toFilter === appliedTo
+        }
         isResetDisabled={!hasActiveFilters}
         loading={loading}
       />
@@ -212,7 +239,7 @@ const handleResetFilters = () => {
         </div>
       )}
 
-      {/* PAGINATION  */}
+      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="flex justify-end gap-2 mt-6">
           <button

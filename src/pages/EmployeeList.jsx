@@ -7,19 +7,24 @@ import FilterActions from "../components/FilterActions";
 const EmployeeList = () => {
   const dispatch = useDispatch();
 
-  // UI state
+  // Draft filter state (UI only)
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("");
+
+  // Applied filter state (API only)
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [appliedTeam, setAppliedTeam] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
 
-  // debounce state
+  // Debounce search
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const { loading, token, employees, totalPages } = useSelector(
     (state) => state.admin
   );
 
-  // DEBOUNCE SEARCH
+  // DEBOUNCE SEARCH (UI only)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -28,33 +33,32 @@ const EmployeeList = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  //Reset page when filters change
-  useEffect(() => {
-    if (currentPage !== 1) setCurrentPage(1);
-  }, [search, teamFilter]);
-
-  // API CALL
+  // API CALL (ONLY applied filters)
   useEffect(() => {
     if (token) {
       dispatch(
         getEmployees({
           token,
           pageNo: currentPage,
-          search: debouncedSearch,
-          teamFilter,
+          search: appliedSearch,
+          teamFilter: appliedTeam,
         })
       );
     }
-  }, [dispatch, token, currentPage, debouncedSearch, teamFilter]);
+  }, [dispatch, token, currentPage, appliedSearch, appliedTeam]);
 
-  //Filter actions
+  // FILTER ACTIONS
   const handleApplyFilters = () => {
+    setAppliedSearch(debouncedSearch);
+    setAppliedTeam(teamFilter);
     setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
     setSearch("");
     setTeamFilter("");
+    setAppliedSearch("");
+    setAppliedTeam("");
     setCurrentPage(1);
   };
 
@@ -104,8 +108,11 @@ const EmployeeList = () => {
       <FilterActions
         onApply={handleApplyFilters}
         onReset={handleResetFilters}
-        isApplyDisabled={!search && !teamFilter}
-        isResetDisabled={!search && !teamFilter}
+        isApplyDisabled={
+          debouncedSearch === appliedSearch &&
+          teamFilter === appliedTeam
+        }
+        isResetDisabled={!appliedSearch && !appliedTeam}
         loading={loading}
       />
 
