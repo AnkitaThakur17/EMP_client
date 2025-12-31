@@ -1,7 +1,11 @@
 import axios from "axios";
+const URL = import.meta.env.VITE_URL
+const PORT = import.meta.env.VITE_PORT
+
+const API_URL = `http://${URL}:${PORT}`;
 
 const axiosInstance = axios.create({
-  baseURL: "http://192.168.1.86:3300",
+  baseURL: API_URL,
   headers: {
     "device-id": "12345",
     "device-type": "android",

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { allAttendance } from "../redux/slices/AttendanceSlice";
-import { getEmployee } from "../redux/slices/AdminSlice";
+import { getEmployees } from "../redux/slices/AdminSlice";
 import { formatTime } from "../../utils/timeFormatter";
 import FilterActions from "../components/FilterActions";
+import Select from "react-select"
+
 
 const AllAttendancePage = () => {
   const dispatch = useDispatch();
@@ -19,12 +21,14 @@ const AllAttendancePage = () => {
     (state) => state.admin
   );
 
+
   // DRAFT FILTER STATE (UI)
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
+  const [userFilter, setUserFilter] = useState("all")
 
   // APPLIED FILTER STATE (API)
   const [appliedSearch, setAppliedSearch] = useState("");
@@ -32,9 +36,12 @@ const AllAttendancePage = () => {
   const [appliedStatus, setAppliedStatus] = useState("");
   const [appliedFrom, setAppliedFrom] = useState("");
   const [appliedTo, setAppliedTo] = useState("");
+  const [appliedUser, setAppliedUser] = useState("")
+
 
   // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
+  const [empPage, setEmpPage] = useState(1);
 
   // DEBOUNCE SEARCH (UI only)
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -55,6 +62,7 @@ const AllAttendancePage = () => {
           token,
           pageNo: currentPage,
           search: appliedSearch,
+          employeeId: appliedUser,
           teamFilter: appliedTeam,
           statusFilter: appliedStatus,
           startDate: appliedFrom,
@@ -67,12 +75,46 @@ const AllAttendancePage = () => {
     token,
     currentPage,
     appliedSearch,
+    appliedUser,
     appliedTeam,
     appliedStatus,
     appliedFrom,
     appliedTo,
   ]);
 
+
+    useEffect(() => {
+      // console.log("appliedTeam",appliedTeam)
+      // console.log("teamFilter",teamFilter)
+
+  // if (!token || !teamFilter) return;
+
+  dispatch(
+    getEmployees({
+      token,
+      teamFilter: teamFilter.toLowerCase(),
+      pageNo: empPage,
+    })
+  );
+}, [token, teamFilter, empPage]);
+
+const loadMore = () => {
+  console.log("loading page:", empPage + 1);
+
+  setEmpPage((prev) => prev + 1);
+};
+
+// console.log("loadMore",loadMore)
+
+const userOptions = employees.map((emp)=>({
+  value: emp._id,
+  label: emp.fullname
+}))
+console.log("userOptions", userOptions)
+    // console.log("employees", employees)
+    // console.log("getEmployees", getEmployees)
+
+    console.log({teamFilter: teamFilter.toLowerCase()})
   const records = attendance?.attendance || [];
 
   // FILTER ACTIONS
@@ -106,7 +148,8 @@ const AllAttendancePage = () => {
     !!appliedTeam ||
     !!appliedStatus ||
     !!appliedFrom ||
-    !!appliedTo;
+    !!appliedUser;
+    !!appliedTo
 
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
@@ -174,6 +217,65 @@ const AllAttendancePage = () => {
             onChange={(e) => setToFilter(e.target.value)}
           />
         </div>
+        <div className="flex flex-col w-64">
+          <label className="text-gray-600 mb-1">Employee</label>
+
+          {/* <Select
+            // value={userFilter}
+            // disabled={teamFilter === "all"}
+            // onChange={(e) => setUserFilter(e.target.value)}
+            options={userOptions}
+            onMenuScrollToBottom={loadMore}
+            // placeholder="Select User"
+            // menuPlacement="auto"
+
+          > */}
+
+
+            {/* <option value="all">All Employees</option>
+
+            {employees?.map((emp) => (
+              <option key={emp._id} value={emp._id}>
+                {emp.fullname}
+              </option>
+            ))} */}
+          {/* </Select> */}
+
+          {/* <Select
+            options={userOptions}
+            onMenuScrollToBottom={loadMore}
+            placeholder="Select User"
+            menuPlacement="auto"
+            isClearable
+          /> */}
+          {/* <Select
+  options={userOptions}
+  onMenuScrollToBottom={loadMore}
+  styles={{
+    menuList: (base) => ({
+      ...base,
+      maxHeight: 150,
+    }),
+  }}
+/> */}
+
+<Select
+  options={userOptions}
+  onMenuOpen={() => console.log("✅ menu opened")}
+  // onMenuScrollToBottom={() => console.log("🔥 reached bottom")}
+  onMenuScrollToBottom={loadMore}
+  styles={{
+    menuList: (base) => ({
+      ...base,
+      maxHeight: 80,   // FORCE SCROLL
+      overflowY: "auto",
+    }),
+  }}
+/>
+
+
+
+        </div>
       </div>
 
       {/* FILTER ACTIONS */}
@@ -182,7 +284,8 @@ const AllAttendancePage = () => {
         onReset={handleResetFilters}
         isApplyDisabled={
           debouncedSearch === appliedSearch &&
-          (teamFilter === "all" ? "" : teamFilter.toLowerCase()) === appliedTeam &&
+          (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
+            appliedTeam &&
           (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
           fromFilter === appliedFrom &&
           toFilter === appliedTo
@@ -279,3 +382,223 @@ const AllAttendancePage = () => {
 };
 
 export default AllAttendancePage;
+
+
+// import { useEffect, useState } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { allAttendance } from "../redux/slices/AttendanceSlice";
+// import { getEmployees } from "../redux/slices/AdminSlice";
+// import { formatTime } from "../../utils/timeFormatter";
+// import FilterActions from "../components/FilterActions";
+
+// const AllAttendancePage = () => {
+//   const dispatch = useDispatch();
+
+//   const { loading, token, allAttendance: attendance, totalPages } =
+//     useSelector((state) => state.attendance);
+
+//   const { employees } = useSelector((state) => state.admin);
+
+//   /* ================= UI FILTERS ================= */
+//   const [search, setSearch] = useState("");
+//   const [teamFilter, setTeamFilter] = useState("all");
+//   const [statusFilter, setStatusFilter] = useState("all");
+//   const [fromFilter, setFromFilter] = useState("");
+//   const [toFilter, setToFilter] = useState("");
+//   const [userFilter, setUserFilter] = useState("all");
+
+//   /* ================= APPLIED FILTERS ================= */
+//   const [appliedSearch, setAppliedSearch] = useState("");
+//   const [appliedTeam, setAppliedTeam] = useState("");
+//   const [appliedStatus, setAppliedStatus] = useState("");
+//   const [appliedFrom, setAppliedFrom] = useState("");
+//   const [appliedTo, setAppliedTo] = useState("");
+//   const [appliedUser, setAppliedUser] = useState("");
+
+//   /* ================= PAGINATION ================= */
+//   const [currentPage, setCurrentPage] = useState(1);
+
+//   /* ================= DEBOUNCE ================= */
+//   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+//   useEffect(() => {
+//     const timer = setTimeout(() => {
+//       setDebouncedSearch(search);
+//     }, 400);
+//     return () => clearTimeout(timer);
+//   }, [search]);
+
+//   /* ================= ATTENDANCE API ================= */
+//   useEffect(() => {
+//     if (!token) return;
+
+//     dispatch(
+//       allAttendance({
+//         token,
+//         pageNo: currentPage,
+//         search: appliedSearch,
+//         teamFilter: appliedTeam,
+//         employeeId: appliedUser,
+//         statusFilter: appliedStatus,
+//         startDate: appliedFrom,
+//         endDate: appliedTo,
+//       })
+//     );
+//   }, [
+//     token,
+//     currentPage,
+//     appliedSearch,
+//     appliedTeam,
+//     appliedUser,
+//     appliedStatus,
+//     appliedFrom,
+//     appliedTo,
+//   ]);
+
+//   /* ================= EMPLOYEE LIST API ================= */
+//   useEffect(() => {
+//     if (!token || !appliedTeam) return;
+
+//     dispatch(
+//       getEmployees({
+//         token,
+//         pageNo: 1,
+//         teamFilter: appliedTeam,
+//       })
+//     );
+//   }, [token, appliedTeam]);
+
+//   const records = attendance?.attendance || [];
+
+//   /* ================= APPLY ================= */
+//   const handleApplyFilters = () => {
+//     setAppliedSearch(debouncedSearch);
+//     setAppliedTeam(teamFilter === "all" ? "" : teamFilter.toLowerCase());
+//     setAppliedStatus(statusFilter === "all" ? "" : statusFilter);
+//     setAppliedFrom(fromFilter);
+//     setAppliedTo(toFilter);
+//     setAppliedUser(userFilter === "all" ? "" : userFilter);
+//     setCurrentPage(1);
+//   };
+
+//   /* ================= RESET ================= */
+//   const handleResetFilters = () => {
+//     setSearch("");
+//     setTeamFilter("all");
+//     setStatusFilter("all");
+//     setFromFilter("");
+//     setToFilter("");
+//     setUserFilter("all");
+
+//     setAppliedSearch("");
+//     setAppliedTeam("");
+//     setAppliedStatus("");
+//     setAppliedFrom("");
+//     setAppliedTo("");
+//     setAppliedUser("");
+
+//     setCurrentPage(1);
+//   };
+
+//   const hasActiveFilters =
+//     !!appliedSearch ||
+//     !!appliedTeam ||
+//     !!appliedStatus ||
+//     !!appliedFrom ||
+//     !!appliedTo ||
+//     !!appliedUser;
+
+//   /* ================= UI ================= */
+//   return (
+//     <div className="flex p-20 flex-col border rounded-xl bg-white">
+//       <h3 className="text-2xl mb-6 font-semibold">Attendance Records</h3>
+
+//       <div className="flex gap-4 flex-wrap mb-6">
+//         <input
+//           placeholder="Search name or email"
+//           className="border px-3 py-2 rounded w-64"
+//           value={search}
+//           onChange={(e) => setSearch(e.target.value)}
+//         />
+
+//         <select
+//           className="border px-3 py-2 rounded w-64"
+//           value={statusFilter}
+//           onChange={(e) => setStatusFilter(e.target.value)}
+//         >
+//           <option value="all">All Status</option>
+//           <option value="On Time">On-Time</option>
+//           <option value="Late">Late</option>
+//           <option value="Absent">Absent</option>
+//         </select>
+
+//         <select
+//           className="border px-3 py-2 rounded w-64"
+//           value={teamFilter}
+//           onChange={(e) => {
+//             setTeamFilter(e.target.value);
+//             setUserFilter("all");
+//           }}
+//         >
+//           <option value="all">All Teams</option>
+//           <option value="Frontend">Frontend</option>
+//           <option value="Backend">Backend</option>
+//           <option value="HR">HR</option>
+//         </select>
+
+//         <select
+//           className="border px-3 py-2 rounded w-64"
+//           value={userFilter}
+//           disabled={teamFilter === "all"}
+//           onChange={(e) => setUserFilter(e.target.value)}
+//         >
+//           <option value="all">All Employees</option>
+//           {employees?.map((emp) => (
+//             <option key={emp._id} value={emp._id}>
+//               {emp.fullName || emp.fullname}
+//             </option>
+//           ))}
+//         </select>
+//       </div>
+
+//       <FilterActions
+//         onApply={handleApplyFilters}
+//         onReset={handleResetFilters}
+//         isResetDisabled={!hasActiveFilters}
+//         loading={loading}
+//       />
+
+//       {/* TABLE */}
+//       {records.length > 0 && (
+//         <table className="w-full border mt-6">
+//           <thead>
+//             <tr>
+//               <th>Date</th>
+//               <th>Employee</th>
+//               <th>Team</th>
+//               <th>Arrival</th>
+//               <th>Leaving</th>
+//               <th>Hours</th>
+//               <th>Status</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {records.map((emp) => (
+//               <tr key={emp._id}>
+//                 <td>{new Date(emp.punchDate).toLocaleDateString("en-GB")}</td>
+//                 <td>{emp.fullname || emp.fullName}</td>
+//                 <td>{emp.team}</td>
+//                 <td>{formatTime(emp.punchInTime)}</td>
+//                 <td>{emp.leavingTime || "-"}</td>
+//                 <td>{emp.workingHours || "-"}</td>
+//                 <td>{emp.punctualStatus}</td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default AllAttendancePage;

@@ -1,7 +1,10 @@
 import { getErrorMessage } from "../../../utils/errorCodes";
 import axiosInstance from "./axioInstance";
+// import env from "react-dotenv";
+const URL = import.meta.env.VITE_URL
+const PORT = import.meta.env.VITE_PORT
 
-const API_URL = "http://192.168.1.86:3300/user/admin";
+const API_URL = `http://${URL}:${PORT}/user/admin`;
 
 //create employee
 const createEmployee = async (employeeData, token) => {
