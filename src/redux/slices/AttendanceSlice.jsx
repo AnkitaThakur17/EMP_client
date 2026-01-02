@@ -52,7 +52,7 @@ export const myAttendance = createAsyncThunk(
 export const allAttendance = createAsyncThunk(
   "attendance/allAttendance",
   async (
-    { pageNo, limit, search, teamFilter, statusFilter, startDate, endDate },
+    { pageNo, limit, search, teamFilter, statusFilter, userFilter, startDate, endDate },
     { rejectWithValue }
   ) => {
     try {
@@ -62,6 +62,7 @@ export const allAttendance = createAsyncThunk(
         search,
         teamFilter,
         statusFilter,
+        userFilter,
         startDate,
         endDate,
       });
@@ -93,6 +94,7 @@ const initialState = {
   filters: {
     team: "",
     status: "",
+    userFilter: "",
     startDate: "",
     endDate: ""
   },
