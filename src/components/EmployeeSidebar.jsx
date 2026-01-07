@@ -1,4 +1,4 @@
-import { Home, User, Calendar, LogOut } from "lucide-react";
+import { Home, User, Calendar, LogOut, ClipboardClock, BookOpenCheck } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../redux/slices/AuthSlice"; // <-- async thunk for logout
@@ -73,7 +73,7 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
        }`
               }
             >
-              <Calendar size={20} className="text-gray-600 shrink-0" />
+              <BookOpenCheck size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
                 <span className="text-gray-700 font-medium transition-all duration-300">
                   Attendance
@@ -93,7 +93,7 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
        }`
               }
             >
-              <Calendar size={20} className="text-gray-600 shrink-0" />
+              <ClipboardClock size={20} className="text-gray-600 shrink-0" />
               {(expanded || isLocked) && (
                 <span className="text-gray-700 font-medium transition-all duration-300">
                   Attendance History

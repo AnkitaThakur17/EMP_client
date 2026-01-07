@@ -9,6 +9,7 @@ import AttendancePage from "./pages/AttendancePage";
 import MyAttendance from "./pages/MyAttendance";
 import AllAttendancePage from "./pages/AllAttendancePage";
 import FilterActions from "./components/FilterActions";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   const { user } = useSelector((state) => state.auth);
@@ -50,6 +51,7 @@ function App() {
         <Route path="myAttendance" element={<MyAttendance/>}/>
         <Route path="allAttendance" element={<AllAttendancePage/>}/>
         <Route path="filterActions" element={<FilterActions/>}/>
+        <Route path="adminDashboard" element={<AdminDashboard/>}/>
         </Route>
         
 

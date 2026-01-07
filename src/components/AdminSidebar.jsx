@@ -1,10 +1,11 @@
 import {
   Home,
   User,
-  ShoppingCart,
-  Calendar,
   Settings,
   LogOut,
+  UserRoundPlus,
+  BookOpenCheck
+  
 } from "lucide-react";
 
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -56,16 +57,16 @@ export default function AdminSidebar({
         <ul className="space-y-3">
           {/* Dashboard */}
           <li>
-            <NavLink
-              to="/dashboard"
+              <NavLink
+              to="/adminDashboard"
               className={({ isActive }) =>
-                `flex items-center gap-3 p-2 rounded-lg transition-colors
+                `flex items-center p-2 transition-colors
        ${
-         isActive ? "bg-blue-100 text-white" : "text-gray-700 hover:bg-blue-50"
+         isActive ? "bg-blue-100 " : "text-gray-700 hover:bg-blue-50"
        }`
               }
             >
-              <Home size={20} className="shrink-0 mr-2" />
+              <Home size={20} className="shrink-0 mr-4" />
 
               {(expanded || isLocked) && (
                 <span className="font-medium transition-all duration-300">
@@ -106,7 +107,7 @@ export default function AdminSidebar({
        }`
               }
             >
-              <ShoppingCart size={20} className="text-gray-600 shrink-0 mr-4" />
+              <UserRoundPlus size={20} className="text-gray-600 shrink-0 mr-4" />
               {(expanded || isLocked) && (
                 <span className="text-gray-700 font-medium transition-all duration-300">
                   Create Employee
@@ -126,7 +127,7 @@ export default function AdminSidebar({
        }`
               }
             >
-              <ShoppingCart size={20} className="text-gray-600 shrink-0 mr-4" />
+              <BookOpenCheck size={20} className="text-gray-600 shrink-0 mr-4" />
               {(expanded || isLocked) && (
                 <span className="text-gray-700 font-medium transition-all duration-300">
                   Attendance Overview

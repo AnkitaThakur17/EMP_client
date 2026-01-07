@@ -101,7 +101,7 @@ const MyAttendance = () => {
                       })}
                     </td>
                     <td className="p-3">{formatTime(att.punchInTime)}</td>
-                    <td className="p-3">{leavingTime}</td>
+                    <td className="p-3">{formatTime(att.leavingTime)}</td>
                     <td className="p-3">{workingHours}</td>
                     <td className={`p-3 font-semibold ${statusColor}`}>
                       {att.punctualStatus}
@@ -131,7 +131,7 @@ const MyAttendance = () => {
                     onClick={() => setCurrentPage(page)}
                     className={`px-3 py-1 border rounded ${
                       currentPage === page ? "bg-indigo-600 text-white" : ""
-                    }`}
+                     }`}
                   >
                     {page}
                   </button>

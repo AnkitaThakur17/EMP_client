@@ -56,7 +56,7 @@ export const allAttendance = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await attendanceService.allAttendance({
+    return await attendanceService.allAttendance({
         pageNo,
         limit,
         search,
@@ -65,6 +65,20 @@ export const allAttendance = createAsyncThunk(
         userFilter,
         startDate,
         endDate,
+      });
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+//lateListThunk 
+export const getLateAttendance = createAsyncThunk(
+  "attendance/getLateAttendance",
+  async ({ isLateList }, { rejectWithValue }) => {
+    try {
+      return await attendanceService.allAttendance({
+       isLateList,
       });
     } catch (error) {
       return rejectWithValue(error);
@@ -89,6 +103,8 @@ const initialState = {
   pageNo: 1,
   limit: 5,
   totalPages: 0,
+  isLateList: true,
+   lateCount: 0,
 
   search: "",
   filters: {
@@ -175,6 +191,20 @@ const attendanceSlice = createSlice({
       })
 
       .addCase(allAttendance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //islateList
+      .addCase(getLateAttendance.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getLateAttendance.fulfilled, (state, action) => {
+        state.loading = false;
+        state.lateCount = action.payload.data.count;
+      })
+
+      .addCase(getLateAttendance.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

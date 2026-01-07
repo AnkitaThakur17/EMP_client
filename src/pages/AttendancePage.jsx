@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { punchIn, punchOut } from "../redux/slices/AttendanceSlice";
+// import { punchIn, punchOut } from "../redux/slices/AttendanceSlice";
+import { punchIn, punchOut, myAttendance } from "../redux/slices/AttendanceSlice";
 import { formatTime } from "../../utils/timeFormatter";
 
 const AttendancePage = () => {
@@ -62,7 +63,12 @@ const AttendancePage = () => {
 
     const payload = { userId: user?.user_id };
 
-    dispatch(punchOut({ punchOutData: payload, token }));
+    // dispatch(punchOut({ punchOutData: payload, token }));
+    dispatch(punchOut({ punchOutData: payload, token }))
+  .then(() => {
+    dispatch(myAttendance());
+  });
+
   };
   return (
     <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">

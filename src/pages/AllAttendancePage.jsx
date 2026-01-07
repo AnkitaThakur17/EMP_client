@@ -21,15 +21,13 @@ const AllAttendancePage = () => {
     (state) => state.admin
   );
 
-
   // DRAFT FILTER STATE (UI)
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [fromFilter, setFromFilter] = useState("");
   const [toFilter, setToFilter] = useState("");
-  const [userFilter, setUserFilter] = useState("all")
-
+  const [userFilter, setUserFilter] = useState("")
   // APPLIED FILTER STATE (API)
   const [appliedSearch, setAppliedSearch] = useState("");
   const [appliedTeam, setAppliedTeam] = useState("");
@@ -60,7 +58,7 @@ const AllAttendancePage = () => {
           token,
           pageNo: currentPage,
           search: appliedSearch,
-          // employeeId: appliedUser,
+          employeeId: appliedUser,
           teamFilter: appliedTeam,
           statusFilter: appliedStatus,
           userFilter: appliedUser,          
@@ -80,12 +78,9 @@ const AllAttendancePage = () => {
     appliedFrom,
     appliedTo,
   ]);
-
   const records = attendance?.attendance || [];
-console.log("userFilter",userFilter)
 const loadOptions = useCallback(
   async (search, loadedOptions, { page }) => {
-    // console.log("loadOptions called", { page });
 
     if (!token) {
       return {
@@ -103,12 +98,9 @@ const loadOptions = useCallback(
       })
     ).unwrap();
 
-    // normalize backend response
   // EXACT extraction based on your API
     const employees = res?.data?.employees || [];
     const totalCount = res?.data?.count || 0;
-  //  console.log("res",res)
-  //  console.log("loadedOptions",loadedOptions)
 
     return {
    
@@ -133,270 +125,267 @@ const loadOptions = useCallback(
     setAppliedTeam(teamFilter === "all" ? "" : teamFilter.toLowerCase());
     setAppliedStatus(statusFilter === "all" ? "" : statusFilter);
   // MAIN LINE
-    setAppliedUser(userFilter?.value || "");
+    // setAppliedUser(userFilter?.value || "");
+    setAppliedUser(userFilter);
+
     setAppliedFrom(fromFilter);
     setAppliedTo(toFilter);
     setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
-    setSearch("");
-    setTeamFilter("all");
-    setStatusFilter("all");
-    setFromFilter("");
-    setToFilter("");
+  // UI filters
+  setSearch("");
+  setDebouncedSearch("");  
+  setTeamFilter("all");
+  setStatusFilter("all");
+  setFromFilter("");
+  setToFilter("");
 
-    setAppliedSearch("");
-    setAppliedTeam("");
-    setAppliedStatus("");
-    setAppliedFrom("");
-    setAppliedTo("");
+  // employee reset
+  setUserFilter("");
+  setAppliedUser("");
 
-    setCurrentPage(1);
-  };
+  // applied filters
+  setAppliedSearch("");
+  setAppliedTeam("");
+  setAppliedStatus("");
+  setAppliedFrom("");
+  setAppliedTo("");
 
-const hasActiveFilters =
+  setCurrentPage(1);
+};
+
+const hasAppliedFilters =
   !!appliedSearch ||
   !!appliedTeam ||
   !!appliedStatus ||
   !!appliedFrom ||
   !!appliedTo ||
-  !!appliedUser
+  !!appliedUser;
+
+
+const hasPendingChanges =
+  debouncedSearch !== appliedSearch ||
+  (teamFilter === "all" ? "" : teamFilter.toLowerCase()) !== appliedTeam ||
+  (statusFilter === "all" ? "" : statusFilter) !== appliedStatus ||
+  fromFilter !== appliedFrom ||
+  toFilter !== appliedTo ||
+  userFilter !== appliedUser;
 
   return (
-    <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
-      <h3 className="text-2xl mb-6 text-gray-800 font-semibold">
-        Attendance Records
-      </h3>
+    <>
+      <div className="flex p-20 flex-col border border-gray-200 rounded-xl mt-10 bg-white">
+        <h3 className="text-2xl mb-6 text-gray-800 font-semibold">
+          Attendance Records
+        </h3>
 
-      {/* FILTER BAR */}
-      <div className="flex gap-4 mb-6 flex-wrap">
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">Search</label>
-          <input
-            type="text"
-            className="border px-3 py-2 rounded-md text-sm"
-            placeholder="Search name or email"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        {/* FILTER BAR */}
+        <div className="flex gap-4 mb-6 flex-wrap">
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">Search</label>
+            <input
+              type="text"
+              className="border px-3 py-2 rounded-md text-sm"
+              placeholder="Search name or email"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">Status</label>
-          <select
-            className="border px-3 py-2 rounded-md text-sm"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="On Time">On-Time</option>
-            <option value="Late">Late</option>
-            <option value="Absent">Absent</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">Team</label>
-          <select
-            className="border px-3 py-2 rounded-md text-sm"
-            value={teamFilter}
-            onChange={(e) => setTeamFilter(e.target.value)}
-          >
-            <option value="all">All Teams</option>
-            <option value="Frontend">Frontend</option>
-            <option value="Backend">Backend</option>
-            <option value="HR">HR</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">From Date</label>
-          <input
-            type="date"
-            className="border px-3 py-2 rounded-md text-sm"
-            value={fromFilter}
-            onChange={(e) => setFromFilter(e.target.value)}
-          />
-        </div>
-
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">To Date</label>
-          <input
-            type="date"
-            className="border px-3 py-2 rounded-md text-sm"
-            value={toFilter}
-            onChange={(e) => setToFilter(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col w-64">
-          <label className="text-gray-600 mb-1">Employee</label>
-
-          {/* <AsyncPaginate
-            key={teamFilter}
-            loadOptions={loadOptions}
-            additional={{ page: 1 }}
-            placeholder="Select a user"
-            isClearable
-            debounceTimeout={300}
-            // onChange={(selected) => {
-            //   setUserFilter(selected); // store selected user
-            // }}
-            onChange={(selected) => {
-              setUserFilter(selected?.value || ""); // UI state
-              setAppliedUser(selected?.value || ""); // applied API filter
-              setCurrentPage(1); // reset pagination
-            }}
-            styles={{
-              menuList: (base) => ({
-                ...base,
-                maxHeight: 120,
-                overflowY: "auto",
-              }),
-            }}
-          /> */}
-
-          <AsyncPaginate
-            key={teamFilter}
-            loadOptions={loadOptions}
-            additional={{ page: 1 }}
-            placeholder="Select a user"
-            isClearable
-            debounceTimeout={300}
-            onChange={(selected) => {
-              const userId = selected?.value || "";
-              setUserFilter(userId);
-              setAppliedUser(userId);
-              setCurrentPage(1);
-
-              // immediately call API for this user
-              dispatch(
-                allAttendance({
-                  token,
-                  pageNo: 1,
-                  search: appliedSearch,
-                  teamFilter: appliedTeam,
-                  statusFilter: appliedStatus,
-                  userFilter: userId,
-                  startDate: appliedFrom,
-                  endDate: appliedTo,
-                })
-              );
-            }}
-            styles={{
-              menuList: (base) => ({
-                ...base,
-                maxHeight: 120,
-                overflowY: "auto",
-              }),
-            }}
-          />
-        </div>
-      </div>
-
-      {/* FILTER ACTIONS */}
-      <FilterActions
-        onApply={handleApplyFilters}
-        onReset={handleResetFilters}
-        isApplyDisabled={
-          debouncedSearch === appliedSearch &&
-          (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
-            appliedTeam &&
-          (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
-          fromFilter === appliedFrom &&
-          toFilter === appliedTo
-        }
-        isResetDisabled={!hasActiveFilters}
-        loading={loading}
-      />
-
-      {/* EMPTY STATE */}
-      {!loading && records.length === 0 && (
-        <p className="text-gray-500">No attendance records found</p>
-      )}
-
-      {/* TABLE */}
-      {records.length > 0 && (
-        <div className="relative">
-          {loading && (
-            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
-              Loading...
-            </div>
-          )}
-
-          <table className="table-auto min-h-[300px] w-full border border-gray-300 rounded-xl">
-            <thead>
-              <tr className="bg-gray-100 text-gray-600 text-sm">
-                <th className="p-2">Date</th>
-                <th className="p-2">Employee</th>
-                <th className="p-2">Team</th>
-                <th className="p-2">Arrival</th>
-                <th className="p-2">Leaving</th>
-                <th className="p-2">Hours</th>
-                <th className="p-2">Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {records.map((emp) => (
-                <tr key={emp._id} className="border-b text-sm">
-                  <td className="px-4 py-3">
-                    {new Date(emp.punchDate).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className="px-4 py-2">
-                    {emp.fullname || emp.fullName || "N/A"}
-                  </td>
-                  <td className="px-4 py-2">{emp.team || "-"}</td>
-                  <td className="px-4 py-2">{formatTime(emp.punchInTime)}</td>
-                  <td className="px-4 py-2">{emp.leavingTime || "-"}</td>
-                  <td className="px-4 py-2">{emp.workingHours || "-"}</td>
-                  <td className="px-4 py-2">{emp.punctualStatus || "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            disabled={loading || currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-            className="px-3 py-1 border rounded-md disabled:opacity-40"
-          >
-            Prev
-          </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              disabled={loading}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 border rounded-md ${
-                currentPage === i + 1
-                  ? "bg-indigo-600 text-white"
-                  : "hover:bg-gray-100"
-              }`}
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">Status</label>
+            <select
+              className="border px-3 py-2 rounded-md text-sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              {i + 1}
-            </button>
-          ))}
+              <option value="all">All Status</option>
+              <option value="On-Time">On-Time</option>
+              <option value="Late">Late</option>
+              <option value="Absent">Absent</option>
+            </select>
+          </div>
 
-          <button
-            disabled={loading || currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-            className="px-3 py-1 border rounded-md disabled:opacity-40"
-          >
-            Next
-          </button>
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">Team</label>
+            <select
+              className="border px-3 py-2 rounded-md text-sm"
+              value={teamFilter}
+              onChange={(e) => setTeamFilter(e.target.value)}
+            >
+              <option value="all">All Teams</option>
+              <option value="Frontend">Frontend</option>
+              <option value="Backend">Backend</option>
+              <option value="HR">HR</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">From Date</label>
+            <input
+              type="date"
+              className="border px-3 py-2 rounded-md text-sm"
+              value={fromFilter}
+              onChange={(e) => setFromFilter(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">To Date</label>
+            <input
+              type="date"
+              className="border px-3 py-2 rounded-md text-sm"
+              value={toFilter}
+              onChange={(e) => setToFilter(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col w-64">
+            <label className="text-gray-600 mb-1">Employee</label>
+
+            <AsyncPaginate
+              // value={selectedUserOption}
+              key={teamFilter}
+              loadOptions={loadOptions}
+              additional={{ page: 1 }}
+              placeholder="Select a user"
+              isClearable
+              debounceTimeout={300}
+              onChange={(selected) => {
+                const userId = selected?.value || "";
+                setUserFilter(userId);
+                // setAppliedUser(userId);
+                setCurrentPage(1);
+              }}
+              styles={{
+                menuList: (base) => ({
+                  ...base,
+                  maxHeight: 120,
+                  overflowY: "auto",
+                }),
+              }}
+            />
+          </div>
         </div>
-      )}
-    </div>
+
+        {/* FILTER ACTIONS */}
+        <FilterActions
+          onApply={handleApplyFilters}
+          onReset={handleResetFilters}
+          // isApplyDisabled={
+          //   debouncedSearch === appliedSearch &&
+          //   (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
+          //     appliedTeam &&
+          //   (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
+          //   fromFilter === appliedFrom &&
+          //   toFilter === appliedTo
+          // }
+
+          isApplyDisabled={
+            debouncedSearch === appliedSearch &&
+            (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
+              appliedTeam &&
+            (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
+            fromFilter === appliedFrom &&
+            toFilter === appliedTo &&
+            userFilter === appliedUser
+          }
+          // isResetDisabled={!hasActiveFilters}
+          isResetDisabled={!hasAppliedFilters}
+          loading={loading}
+        />
+
+        {/* EMPTY STATE */}
+        {!loading && records.length === 0 && (
+          <p className="text-gray-500">No attendance records found</p>
+        )}
+
+        {/* TABLE */}
+        {records.length > 0 && (
+          <div className="relative">
+            {loading && (
+              <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+                Loading...
+              </div>
+            )}
+
+            <table className="table-auto min-h-[300px] w-full border border-gray-300 rounded-xl">
+              <thead>
+                <tr className="bg-gray-100 text-gray-600 text-sm">
+                  <th className="p-2">Date</th>
+                  <th className="p-2">Employee</th>
+                  <th className="p-2">Team</th>
+                  <th className="p-2">Arrival</th>
+                  <th className="p-2">Leaving</th>
+                  <th className="p-2">Hours</th>
+                  <th className="p-2">Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {records.map((emp) => (
+                  <tr key={emp._id} className="border-b text-sm">
+                    <td className="px-4 py-3">
+                      {new Date(emp.punchDate).toLocaleDateString("en-GB", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-2">
+                      {emp.fullname || emp.fullName || "N/A"}
+                    </td>
+                    <td className="px-4 py-2">{emp.team || "-"}</td>
+                    <td className="px-4 py-2">{formatTime(emp.punchInTime)}</td>
+                    <td className="px-4 py-2">{emp.leavingTime || "-"}</td>
+                    <td className="px-4 py-2">{emp.workingHours || "-"}</td>
+                    <td className="px-4 py-2">{emp.punctualStatus || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              disabled={loading || currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-3 py-1 border rounded-md disabled:opacity-40"
+            >
+              Prev
+            </button>
+
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                disabled={loading}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 border rounded-md ${
+                  currentPage === i + 1
+                    ? "bg-indigo-600 text-white"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={loading || currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-3 py-1 border rounded-md disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
 export default AllAttendancePage;
-
- 

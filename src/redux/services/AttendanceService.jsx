@@ -53,7 +53,7 @@ const myAttendance = async () => {
 };
 
 // allAttendance
-const allAttendance = async ({ pageNo, limit, search, teamFilter, startDate, endDate, statusFilter }) => {
+const allAttendance = async ({ pageNo, limit, search, teamFilter, userFilter, startDate, endDate, statusFilter, isLateList }) => {
   try {
     const response = await axiosInstance.get("/attendance/allAttendance", {
       params: {
@@ -61,9 +61,11 @@ const allAttendance = async ({ pageNo, limit, search, teamFilter, startDate, end
         limit,
         search,
         teamFilter,
+        userFilter,
         startDate,
         endDate,
         statusFilter,
+        isLateList
       },
     });
 
