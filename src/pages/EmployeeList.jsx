@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getEmployees } from "../redux/slices/AdminSlice";
 import { Link } from "react-router-dom";
 import FilterActions from "../components/FilterActions";
+import {SquarePen} from "lucide-react";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -140,6 +141,7 @@ const EmployeeList = () => {
                 <th className="p-2">Team</th>
                 <th className="p-2">DOB</th>
                 <th className="p-2">Subrole</th>
+                <th className="p-2">Edit</th>
               </tr>
             </thead>
 
@@ -163,7 +165,11 @@ const EmployeeList = () => {
                       ? new Date(emp.dob).toLocaleDateString("en-GB")
                       : "-"}
                   </td>
-                  <td className="px-4 py-2">{emp.subrole || "-"}</td>
+                  <td className="px-4 py-2">{emp.subrole || "-"}
+                  </td>
+                  <td className="px-4 py-2">
+                    <SquarePen size={20} className="text-gray-600 shrink-0"/>
+                  </td>
                 </tr>
               ))}
             </tbody>

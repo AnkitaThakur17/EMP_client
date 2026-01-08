@@ -53,7 +53,6 @@ const EmployeeSidebar = ({ expanded, setExpanded, isLocked, setIsLocked }) => {
               }
             >
               <Home size={20} className="shrink-0" />
-
               {(expanded || isLocked) && (
                 <span className="font-medium transition-all duration-300">
                   Dashboard

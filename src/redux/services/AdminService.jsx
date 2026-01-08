@@ -66,6 +66,24 @@ const getEmployee = async (userId) => {
   }
 };
 
+//Update Employee
+const updateEmployee = async(userId, userData)=>{
+  try {
+    const response = await axiosInstance.put(
+      `${API_URL}/updateEmployee/${userId}`,
+       userData
+    )
+    return {
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  } catch (error) {
+    handleError(error);
+  }  
+  }
+
+
 /* COMMON ERROR HANDLER*/
 const handleError = (error) => {
   if (error.response) {
@@ -89,5 +107,6 @@ export default {
   createEmployee,
   getEmployees,
   getEmployee,
+  updateEmployee
 };
 

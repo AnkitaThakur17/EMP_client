@@ -32,18 +32,30 @@ function App() {
             user ? <MainLayout /> : <Navigate to="/login" replace />
           }
         >
-        {/* Nested pages */}
+          {/* DEFAULT PAGE AFTER LOGIN */}
+
           <Route
             index
             element={
-              <div className="p-6 text-gray-700">
-                <h1 className="text-2xl font-semibold m-10">Welcome, {user?.fullname}!</h1>
-                <p className="mt-2 m-10 text-gray-600">
-                 (dashboard content will be here)
-                </p>
-              </div>
+              user?.role === "admin" && (
+                <Navigate to="adminDashboard" replace />
+              )
             }
           />
+
+          {/* for user */}
+          {/* <Route
+            index
+            element={
+              user?.role === "admin" ? (
+                <Navigate to="adminDashboard" replace />
+              ) : (
+                <Navigate to="attendancePage" replace />
+              )
+            }
+          /> */}
+
+        {/* Nested pages */}
         <Route path="create-employee" element={<CreateEmployee />} />
         <Route path="employeeList" element={<EmployeeList/>} />
         <Route path="employeeProfile" element={<EmployeeProfile/>} />
@@ -51,10 +63,9 @@ function App() {
         <Route path="myAttendance" element={<MyAttendance/>}/>
         <Route path="allAttendance" element={<AllAttendancePage/>}/>
         <Route path="filterActions" element={<FilterActions/>}/>
-        <Route path="adminDashboard" element={<AdminDashboard/>}/>
+        <Route path="adminDashboard" element={<AdminDashboard/>}/>      
         </Route>
         
-
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
