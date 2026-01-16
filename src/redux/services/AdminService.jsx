@@ -67,10 +67,10 @@ const getEmployee = async (userId) => {
 };
 
 //Update Employee
-const updateEmployee = async(userId, userData)=>{
+const updateEmployeeService = async(userId, userData)=>{
   try {
     const response = await axiosInstance.put(
-      `${API_URL}/updateEmployee/${userId}`,
+        `${API_URL}/updateEmployee/${userId}`,
        userData
     )
     return {
@@ -79,10 +79,10 @@ const updateEmployee = async(userId, userData)=>{
       data: response.data.data,
     };
   } catch (error) {
-    handleError(error);
-  }  
+  handleError(error);
+  throw error;
+}
   }
-
 
 /* COMMON ERROR HANDLER*/
 const handleError = (error) => {
@@ -107,6 +107,5 @@ export default {
   createEmployee,
   getEmployees,
   getEmployee,
-  updateEmployee
+  updateEmployeeService
 };
-

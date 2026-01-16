@@ -1,6 +1,11 @@
 import axiosInstance from "./axioInstance";
 import { getErrorMessage } from "../../../utils/errorCodes";
 
+const URL = import.meta.env.VITE_URL;
+const PORT = import.meta.env.VITE_PORT;
+
+const API_URL = `http://${URL}:${PORT}/attendance`;
+
 // punchIn
 const punchIn = async (punchInData) => {
   try {
@@ -77,7 +82,24 @@ const allAttendance = async ({ pageNo, limit, search, teamFilter, userFilter, st
   } catch (error) {
     handleError(error);
   }
-};
+}
+
+const updateAttendanceService = async(attendanceId, userData)=>{
+  try {
+    const response = await axiosInstance.put(
+        `${API_URL}/updateAttendance/${attendanceId}`,
+       userData
+    )
+    return {
+      status: response.status,
+      message: response.data.message,
+      data: response.data.data,
+    };
+  } catch (error) {
+  handleError(error);
+  throw error;
+}
+  }
 
 const handleError = (error) => {
   if (error.response) {
@@ -97,4 +119,4 @@ const handleError = (error) => {
   throw { code: 0, message: error.message || "An error occurred" };
 };
 
-export default { punchIn, punchOut, myAttendance, allAttendance };
+export default { punchIn, punchOut, myAttendance, allAttendance, updateAttendanceService };

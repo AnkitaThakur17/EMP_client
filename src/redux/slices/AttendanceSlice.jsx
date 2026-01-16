@@ -85,6 +85,20 @@ export const getLateAttendance = createAsyncThunk(
     }
   }
 );
+
+//update attendance thunk
+export const updateAttendance = createAsyncThunk(
+  "attendance/updateAttendance",
+  async ({ attendanceId, userData }, { rejectWithValue }) => {
+    try {
+      const res = await attendanceService.updateAttendanceService(attendanceId, userData);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err.message);
+    }
+  }
+);
+
 // Initial state
 const initialState = {
 
@@ -155,10 +169,12 @@ const attendanceSlice = createSlice({
       .addCase(punchOut.pending, (state) => {
         state.loading = true;
       })
+
       .addCase(punchOut.fulfilled, (state, action) => {
         state.loading = false;
         state.punchOutData = action.payload.data;
       })
+
       .addCase(punchOut.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -205,6 +221,30 @@ const attendanceSlice = createSlice({
       })
 
       .addCase(getLateAttendance.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      //updateAttendance
+      .addCase(updateAttendance.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateAttendance.fulfilled, (state, action) => {
+        state.loading = false;
+
+        const updatedAttendance = action.payload.data || action.payload;
+        state.allAttendance.attendance = state.allAttendance.attendance.map(
+          (att) =>
+            att._id.toString() === updatedAttendance._id.toString()
+              ? {
+                  ...att,
+                  attendanceRemark: updatedAttendance.attendanceRemark,
+                }
+              : att
+        );
+      })
+
+      .addCase(updateAttendance.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

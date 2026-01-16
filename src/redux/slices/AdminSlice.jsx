@@ -70,21 +70,17 @@ export const getEmployee = createAsyncThunk(
   }
 );
 
-//update employee
 export const updateEmployee = createAsyncThunk(
   "admin/updateEmployee",
-  async (token, userData, { rejectWithValue }) =>{
+  async ({ userId, userData }, { rejectWithValue }) => {
     try {
-      const response = await adminService.updateEmployee(token, userData);
-      return response
-    } catch (error) {
-      return rejectWithValue({
-        code: error.code,
-        message: error.message,
-      });
+      const res = await adminService.updateEmployeeService(userId, userData);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err?.response?.data || err.message);
     }
   }
-)
+);
 
 const initialState = {
   user: getStoredUser(),
@@ -101,7 +97,6 @@ const initialState = {
     team: ""
   }
 };
-
 const adminSlice = createSlice({
   name: "admin",
   initialState,
@@ -171,19 +166,25 @@ const adminSlice = createSlice({
       //update Employee
       .addCase(updateEmployee.pending, (state) => {
         state.loading = true;
-        state.error = null
+        state.error = null;
       })
 
       .addCase(updateEmployee.fulfilled, (state, action) => {
-        state.loading = false;
-        state.employees.push(action.payload)
+         state.loading = false; 
+        const updatedEmployee = action.payload;
+        state.employees = state.employees.map((emp) =>
+          emp._id.toString() === updatedEmployee._id.toString()
+            ? updatedEmployee
+            : emp
+        );
       })
 
       .addCase(updateEmployee.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
   },
+  
 });
 export const { setTeamFilter } = adminSlice.actions;
 export default adminSlice.reducer;

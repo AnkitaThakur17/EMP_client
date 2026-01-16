@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-// import { punchIn, punchOut } from "../redux/slices/AttendanceSlice";
 import { punchIn, punchOut, myAttendance } from "../redux/slices/AttendanceSlice";
 import { formatTime } from "../../utils/timeFormatter";
 
@@ -63,7 +62,6 @@ const AttendancePage = () => {
 
     const payload = { userId: user?.user_id };
 
-    // dispatch(punchOut({ punchOutData: payload, token }));
     dispatch(punchOut({ punchOutData: payload, token }))
   .then(() => {
     dispatch(myAttendance());
@@ -99,7 +97,7 @@ const AttendancePage = () => {
           </li>
           <li>{formatTime(attendance?.punchInTime) || "--"}</li>
           <li>{formatTime(attendance?.leavingTime) || "--"}</li>
-          <li>{attendance?.workingHours || "--"}</li>
+          <li>{attendance?.workingHours|| "--"}</li>
           <li className="text-red-600">{attendance?.punctualStatus || "--"}</li>
           <li>{attendance?.punchType || "--"}</li>
         </ul>

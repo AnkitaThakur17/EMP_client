@@ -14,7 +14,7 @@ const MyAttendance = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
 
   const paginatedData = useMemo(()=>{
 
@@ -79,7 +79,7 @@ const MyAttendance = () => {
                 const punchDate = new Date(att.punchDate).toLocaleDateString();
                 const punchInTime = att.punchInTime || "-";
                 const leavingTime = att.leavingTime || "-";
-                const workingHours = att.totalHours || "0 hrs";
+                const workingHours = att.totalHours || "-";
                 const statusColor =
                   att.punctualStatus === "On-Time"
                     ? "text-green-600"
@@ -102,7 +102,7 @@ const MyAttendance = () => {
                     </td>
                     <td className="p-3">{formatTime(att.punchInTime)}</td>
                     <td className="p-3">{formatTime(att.leavingTime)}</td>
-                    <td className="p-3">{workingHours}</td>
+                    <td className="p-3">{att.workingHours}</td>
                     <td className={`p-3 font-semibold ${statusColor}`}>
                       {att.punctualStatus}
                     </td>

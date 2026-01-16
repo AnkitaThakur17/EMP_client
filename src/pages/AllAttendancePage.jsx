@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { allAttendance } from "../redux/slices/AttendanceSlice";
+import { allAttendance, updateAttendance } from "../redux/slices/AttendanceSlice";
 import { getEmployees } from "../redux/slices/AdminSlice";
 import { formatTime } from "../../utils/timeFormatter";
 import FilterActions from "../components/FilterActions";
 import { useCallback } from "react";
 import { AsyncPaginate } from "react-select-async-paginate";
+import { SquarePen } from "lucide-react";
 
 const AllAttendancePage = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,53 @@ const AllAttendancePage = () => {
     (state) => state.admin
   );
 
+  // Edit attendnace
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedAttendance, setSelectedAttendance] = useState(null);
+
+  const [formData, setFormData] = useState({
+    attendanceRemark: "",
+    punchInTime: "",
+    leavingTime: ""
+  });
+
+    // Prefill the modal form data when selectedEmployee changes
+    useEffect(() => {
+      if (selectedAttendance) {
+        setFormData({
+          attendanceRemark: selectedAttendance.attendanceRemark || "",
+          punchInTime: selectedAttendance.punchInTime || "",
+          leavingTime: selectedAttendance.leavingTime || ""
+        });
+      }
+    }, [selectedAttendance]);
+
+    // Generic handleChange for all inputs
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+      };
+    
+      // Edit button click
+      const handleEditClick = (attendance) => {
+        setSelectedAttendance(attendance);
+        setIsEditOpen(true);
+      };
+    
+      // Save updated attendance
+      const handleUpdateAttendance = () => {
+        dispatch(
+          updateAttendance({
+            token,
+            attendanceId: selectedAttendance._id,
+            userData: formData,
+          })
+        ).then(() => {
+          setIsEditOpen(false);
+          setSelectedAttendance(null);
+        });
+      };
+    
   // DRAFT FILTER STATE (UI)
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
@@ -103,14 +151,12 @@ const loadOptions = useCallback(
     const totalCount = res?.data?.count || 0;
 
     return {
-   
-      options: employees.map((emp) => ({
+        options: employees.map((emp) => ({
         label: emp.fullname,
         value: emp._id,
       })),
-     // pagination logic
+  // pagination logic
       hasMore: loadedOptions.length + employees.length < totalCount,
-
       additional: {
         page: page + 1,
       },
@@ -124,10 +170,9 @@ const loadOptions = useCallback(
     setAppliedSearch(debouncedSearch);
     setAppliedTeam(teamFilter === "all" ? "" : teamFilter.toLowerCase());
     setAppliedStatus(statusFilter === "all" ? "" : statusFilter);
-  // MAIN LINE
-    // setAppliedUser(userFilter?.value || "");
-    setAppliedUser(userFilter);
 
+  // MAIN LINE
+    setAppliedUser(userFilter);
     setAppliedFrom(fromFilter);
     setAppliedTo(toFilter);
     setCurrentPage(1);
@@ -163,15 +208,6 @@ const hasAppliedFilters =
   !!appliedFrom ||
   !!appliedTo ||
   !!appliedUser;
-
-
-const hasPendingChanges =
-  debouncedSearch !== appliedSearch ||
-  (teamFilter === "all" ? "" : teamFilter.toLowerCase()) !== appliedTeam ||
-  (statusFilter === "all" ? "" : statusFilter) !== appliedStatus ||
-  fromFilter !== appliedFrom ||
-  toFilter !== appliedTo ||
-  userFilter !== appliedUser;
 
   return (
     <>
@@ -244,7 +280,6 @@ const hasPendingChanges =
             <label className="text-gray-600 mb-1">Employee</label>
 
             <AsyncPaginate
-              // value={selectedUserOption}
               key={teamFilter}
               loadOptions={loadOptions}
               additional={{ page: 1 }}
@@ -254,7 +289,6 @@ const hasPendingChanges =
               onChange={(selected) => {
                 const userId = selected?.value || "";
                 setUserFilter(userId);
-                // setAppliedUser(userId);
                 setCurrentPage(1);
               }}
               styles={{
@@ -272,15 +306,6 @@ const hasPendingChanges =
         <FilterActions
           onApply={handleApplyFilters}
           onReset={handleResetFilters}
-          // isApplyDisabled={
-          //   debouncedSearch === appliedSearch &&
-          //   (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
-          //     appliedTeam &&
-          //   (statusFilter === "all" ? "" : statusFilter) === appliedStatus &&
-          //   fromFilter === appliedFrom &&
-          //   toFilter === appliedTo
-          // }
-
           isApplyDisabled={
             debouncedSearch === appliedSearch &&
             (teamFilter === "all" ? "" : teamFilter.toLowerCase()) ===
@@ -290,7 +315,6 @@ const hasPendingChanges =
             toFilter === appliedTo &&
             userFilter === appliedUser
           }
-          // isResetDisabled={!hasActiveFilters}
           isResetDisabled={!hasAppliedFilters}
           loading={loading}
         />
@@ -319,6 +343,8 @@ const hasPendingChanges =
                   <th className="p-2">Leaving</th>
                   <th className="p-2">Hours</th>
                   <th className="p-2">Status</th>
+                  <th className="p-2">Remark</th>
+                  <th className="p-2">Edit</th>
                 </tr>
               </thead>
 
@@ -341,6 +367,14 @@ const hasPendingChanges =
                     <td className="px-4 py-2">{emp.leavingTime || "-"}</td>
                     <td className="px-4 py-2">{emp.workingHours || "-"}</td>
                     <td className="px-4 py-2">{emp.punctualStatus || "-"}</td>
+                    <td className="px-4 py-2">{emp.attendanceRemark || "-"}</td>
+
+                    <button
+                      onClick={() => handleEditClick(emp)}
+                      className="p-1 hover:text-blue-600 mt-5"
+                    >
+                      <SquarePen size={20} className="text-gray-600 shrink-0" />
+                    </button>
                   </tr>
                 ))}
               </tbody>
@@ -383,6 +417,59 @@ const hasPendingChanges =
             </button>
           </div>
         )}
+
+
+      {/* EDIT MODAL */}
+      {isEditOpen && selectedAttendance && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded w-[400px]">
+            <h2 className="text-lg font-semibold mb-4">Give Remark ( {selectedAttendance?.fullname} )</h2>
+
+            <div className="flex flex-col gap-2">
+              <lable className="text-blue-400">Remark</lable>
+              <input
+                name="attendanceRemark"
+                value={formData.attendanceRemark}
+                onChange={handleChange}
+                placeholder="Remark"
+                className="border px-3 py-2 rounded"
+              />
+                <lable className="text-blue-400">punchInTime</lable>
+                <input
+                name="punchInTime"
+                value={formData.punchInTime}
+                onChange={handleChange}
+                placeholder="Remark"
+                className="border px-3 py-2 rounded"
+              />
+                <lable className="text-blue-400">leavingTime</lable>
+                <input
+                name="leavingTime"
+                value={formData.leavingTime}
+                onChange={handleChange}
+                placeholder="Remark"
+                className="border px-3 py-2 rounded"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setIsEditOpen(false)}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateAttendance}
+                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </>
   );
